@@ -1,7 +1,7 @@
 require('dotenv').config(); // --> process.env
 const express = require( 'express' );
 const fs = require('fs');
-// const orm = require( './db/orm.mongoose' );
+const orm = require( './db/orm.mongoose' );
 
 const PORT = process.env.PORT || 8080;
 
@@ -31,7 +31,13 @@ app.post('/api/product/:id/review', async function( req,res ){
 
 });
 
-
+app.post('/api/user/registration', async function( req,res ){
+    const userData = req.body;
+    console.log( `[POST: /api/user/registration] userData: `, userData );
+    
+    const registerResult = await orm.registerUser( userData );
+    res.send( registerResult );
+})
 app.listen( PORT, function(){
     console.log( `[everest server] RUNNING, http://localhost:${PORT}` );
  });

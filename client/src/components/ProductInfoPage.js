@@ -19,7 +19,9 @@ function ProductInfoPage( props ){
         setShowProduct( apiProduct );
     }
 
-    function addToCart(){
+    function addToCart(e){
+        e.preventDefault();
+        
         dispatch({ 
             type: 'addToCart', id, num: 1, ...showProduct });
     }
