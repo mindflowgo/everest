@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import RatingBar from "./RatingBar";
 import ProductReviews from "./ProductReviews";
-import { useGlobalStore } from "./GlobalStore";
 
 function ProductInfoPage( props ){
     const { id } = useParams();
     const [ showProduct, setShowProduct ]= useState([]);
-    const [ globalData, dispatch ] = useGlobalStore();
 
     // load only ONCE at component load
     useEffect( function(){
@@ -17,11 +15,6 @@ function ProductInfoPage( props ){
     async function loadProduct( id ){    
         const apiProduct = await fetch(`/api/product/${id}`).then( result=>result.json() );
         setShowProduct( apiProduct );
-    }
-
-    function addToCart(){
-        dispatch({ 
-            type: 'addToCart', id, num: 1, ...showProduct });
     }
 
     return (
@@ -37,7 +30,7 @@ function ProductInfoPage( props ){
                     <h3><RatingBar rating={showProduct.rating} /></h3>
 
                     {/* <ProductAction /> */}
-                    <button onClick={addToCart} class="btn btn-lg btn-primary"><i class="fas fa-cart-plus"></i></button>
+                    <button class="btn btn-lg btn-primary"><i class="fas fa-cart-plus"></i></button>
                     
                 </div>
                 {showProduct.description}

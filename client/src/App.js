@@ -1,10 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
+import { GlobalStore } from "./components/GlobalStore";
+
 import NavBar from './components/NavBar';
 import ProductListPage from './components/ProductListPage';
 import ProductInfoPage from './components/ProductInfoPage';
 import SettingsPage from './components/SettingsPage';
+import ProductAddPage from './components/ProductAddPage';
+import CartPage from './components/CartPage';
 import Footer from './components/Footer';
 
 /* Our EVEREST App 
@@ -13,30 +17,27 @@ import Footer from './components/Footer';
 * added <Link> to the ProductCard
 
 Today's Mission:
-- Finish building out the UI
-- Wire-up the logic for it
-- Build the backend (Mongo + Node + Express)
-- Asking questions that relate to Google Book Search (as our app will be
-  quite similar)
-
-- *** Start at 10:10am ***
-
-- Monday's Mission: Adding oAuth login for our user
+- Add Global Storage
+- Add Mongo
 
 */
 function App() {
   return (
     <Router>
-    <div className="App">
-        <NavBar />
-        <div class="container">
-          <Route exact path={["/","/productlist"]} component={ProductListPage} />
-          <Route path="/productinfo/:id" component={ProductInfoPage} />
-          <Route exact path="/settings" component={SettingsPage} />
-        </div>
+      <GlobalStore> {/* provides common elements across components */}
+      <div className="App">
+          <NavBar />
+          <div class="container">
+            <Route exact path={["/","/productlist"]} component={ProductListPage} />
+            <Route path="/productinfo/:id" component={ProductInfoPage} />
+            <Route exact path="/productadd" component={ProductAddPage} />
+            <Route exact path="/cart" component={CartPage} />
+            <Route exact path="/settings" component={SettingsPage} />
+          </div>
 
-        <Footer />
-    </div>
+          <Footer />
+      </div>
+      </GlobalStore>
     </Router>
   );
 }
