@@ -56,10 +56,10 @@ app.post('/api/product/:id/review', needSession, async function( req,res ){
 
 });
 
+
 app.post('/api/user/register', async function( req,res ){
     const userData = req.body;
     console.log( `[POST: /api/user/register] userData: `, userData );
-
     const registerResult = await orm.registerUser( userData );
     res.send( registerResult );
 });
@@ -67,7 +67,6 @@ app.post('/api/user/register', async function( req,res ){
 app.post('/api/user/login', async function( req,res ){
     const userData = req.body;
     console.log( `[POST: /api/user/login] userData: `, userData );
-
     const loginResult = await orm.loginUser( userData.email, userData.password );
     loginResult.rememberMe = req.body.rememberMe;
     res.send( loginResult );
@@ -75,10 +74,10 @@ app.post('/api/user/login', async function( req,res ){
 
 app.post('/api/user/logout', needSession, async function( req,res ){
     console.log( `[POST: /api/user/logout] userData: ` );
-
     const logoutResult = await orm.logoutUser( req.headers.session );
     res.send( logoutResult );
 });
+
 
 app.listen( PORT, function(){
     console.log( `[everest server] RUNNING, http://localhost:${PORT}` );

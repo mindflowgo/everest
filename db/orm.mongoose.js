@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require ( 'bcrypt' );
-const uuid = require( 'uuid' );
+const uuid = require( 'uuid/v4' );
 
-mongoose.connect(`mongodb://localhost:27017/${process.env.DB_NAME}`, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
 
 // include mongoose models (it will include each file in the models directory)
 const db = require( './models' );
@@ -139,7 +139,7 @@ async function loginUser( email, password ) {
     }
 
     // create a new session for this user and save it.
-    userData.session = uuid.v4();
+    userData.session = uuid();
 
     // update the session
     // remove entries before we do teh update
