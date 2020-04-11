@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
+import API from "./API";
 
 function ProductListPage( props ){
     const [ products, setProducts ]= useState([]);
@@ -10,7 +11,7 @@ function ProductListPage( props ){
     }, [] );
 
     async function loadProducts(){
-        const apiProducts = await fetch('/api/product/list').then( result=>result.json() );
+        const apiProducts = await API.get('/api/product/list');
         setProducts( apiProducts );
     }
 

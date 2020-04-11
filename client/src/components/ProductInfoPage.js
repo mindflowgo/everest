@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import RatingBar from "./RatingBar";
 import ProductReviews from "./ProductReviews";
 import { useGlobalStore } from "./GlobalStore";
+import API from "./API";
+
 
 function ProductInfoPage( props ){
     const { id } = useParams();
@@ -14,14 +16,12 @@ function ProductInfoPage( props ){
         loadProduct( id );
     }, [] );
 
-    async function loadProduct( id ){    
-        const apiProduct = await fetch(`/api/product/${id}`).then( result=>result.json() );
+    async function loadProduct( id ){  
+        const apiProduct = await API.get(`/api/product/${id}`);
         setShowProduct( apiProduct );
     }
 
-    function addToCart(e){
-        e.preventDefault();
-        
+    function addToCart(){
         dispatch({ 
             type: 'addToCart', id, num: 1, ...showProduct });
     }

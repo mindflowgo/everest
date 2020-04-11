@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 import { Redirect } from 'react-router-dom';
+import API from "./API";
 
-function RegisterPage(){
+function LoginPage(){
     // DECLARATIVE FORM OF PROGRAMMING
-    const [ userData, setUserData ] = useState({ name: "", email: "", password: ""});
-    const [ isRegistered, setIsRegistered ] = useState( false );
+    const [ userData, setUserData ] = useState({ name: "", email: localStorage.email, password: "", rememberMe: true });
+    const [ isLoggedIn, setIsLoggedIn ] = useState( false );
     const [ alertMessage, setAlertMessage ] = useState( { type: "", message: ""} );
 
     const inputEmail = useRef();
@@ -16,80 +17,64 @@ function RegisterPage(){
         setUserData( { ...userData, [id]: value } );
     }
 
-    async function registerUser( e ){
+    function handleCheckbox(){
+        setUserData( { ...userData, rememberMe: !userData.rememberMe } );
+    }
+
+    async function loginUser( e ){
         e.preventDefault();
         
         if( userData.email === "" ) {
-            inputEmail.current.focus();
+            inputEmail.focus();
             setAlertMessage( { type: 'danger', message: 'Please provide your Email!' } );
             return;
         }
     
-        if( !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userData.email)) ) {
-            inputEmail.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a valid Email!' } );
-            return;
-        }
-
-        if( userData.password === "" ) {
+        if( userData.password === "" || userData.password.length < 8 ) {
             inputPassword.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a password!' } );
+            setAlertMessage( { type: 'danger', message: 'Please provide your password!' } );
             return;
         }
 
-        if( userData.password.length < 8 ) {
-            inputPassword.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a longer password (8 characters min)!' } );
-            return;
-        }
-
-        const apiResult = await fetch('/api/user/register', 
-            {   method: 'post',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-          }).then( result=>result.json())
+        const apiResult = await API.post( '/api/user/login', userData );
                   
-        if( apiResult.message ){
-            setAlertMessage( { type: 'success', message: 'Thank you successfully registered!' } );
-            // remember the email
-            localStorage.email = apiResult.email;
-            setTimeout( function(){ setIsRegistered(true); }, 5000 );
-        } else {
+        if( !apiResult.session ){
             setAlertMessage( { type: 'danger', message: apiResult.error } );
-        }
+            // clear any session
+            localStorage.session = '';
+            return;
+        };
+
+        setAlertMessage( { type: 'success', message: 'Loading, please wait...' } );
+
+        // remember the email (if checkbox toggled)
+        localStorage.email =( apiResult.rememberMe ? apiResult.email : '' );
+        // save the active session
+        localStorage.session = apiResult.session;
+
+        setTimeout( function(){ setIsLoggedIn(true); }, 3000 );
     }
 
     return (
         <div>
-            { isRegistered ? <Redirect to='/login' /> : '' }
+            { isLoggedIn ? <Redirect to='/productlist' /> : '' }
 
             <div className={ alertMessage.type ? `alert alert-${alertMessage.type}` : 'd-hide' } role="alert">
                 {alertMessage.message}
             </div>
             <section class="jumbotron text-center">
             <div class="container">
-                <h1>User Registration</h1>
+                <h1>Login</h1>
                 <p class="lead text-muted">Register and go shopping!</p>
             </div>
             </section>
         
             <div class="container">
                 <div class="card">
-                    <div class="card-header">
-                    Register
-                    </div>
                     <div class="card-body">
                     <form role="form">
-                        <input type='hidden' id='db_id' value='' />
                         <div class="form-group">
-                            <label for="name">First Name</label>
-                            <input value={userData.name} onChange={handleInputChange} id='name' type="text" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email Address</label>
+                            <label for="userEmail">Email Address</label>
                             <input 
                                 value={userData.email} 
                                 onChange={handleInputChange} 
@@ -104,7 +89,12 @@ function RegisterPage(){
                                 ref={inputPassword}
                                 id="password" type="password" class="form-control" />
                         </div>
-                        <button onClick={registerUser} class="btn btn-primary submit" >Register</button>
+                        <button onClick={loginUser} type="button" class="btn btn-primary submit">Login</button>
+                        &nbsp; 
+                        <input type="checkbox"
+                        checked={userData.rememberMe} onChange={handleCheckbox} />                        
+                        <label class='text-secondary' for='rememberMe'>Remember Me</label> &nbsp;
+                        <a href="/register">Need to Register?</a>
                     </form>
                     </div>
                 </div>
@@ -113,4 +103,4 @@ function RegisterPage(){
     )
 }
 
-export default RegisterPage;
+export default LoginPage;

@@ -2,7 +2,10 @@ import React from "react";
 
 function Footer( props ){
     return (
-        <div class="footer">(c) 2020 The Everest Team</div>
+        <>
+            <div id="footer-padding"></div>
+            <div id="footer">(c) 2020 The Everest Team</div>
+        </>
     )
 }
 

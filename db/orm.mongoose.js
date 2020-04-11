@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require ( 'bcrypt' );
+const uuid = require( 'uuid' );
 
-mongoose.connect(`mongodb://localhost:27017/${process.env.DB_NAME}`, {useNewUrlParser: true});
+mongoose.connect(`mongodb://localhost:27017/${process.env.DB_NAME}`, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
 
 // include mongoose models (it will include each file in the models directory)
 const db = require( './models' );
@@ -84,53 +85,94 @@ async function getThumbnail( thumbId ){
    };
 }
 
-// input: <object> { name, email, password }
+// input: <object> { name, email, password }, session
 // output: { message, id, name }
-async function registerUser( userData ){
-    if( !userData.password || !userData.name || !userData.email ){
+async function registerUser( userData, session='' ){
+    if( !userData.name || !userData.email ){
         console.log( `[registerUser] invalid userData! `, userData );
         return { message: "Invalid user data", id: "", name: "" };
     }
-    
+
+    let passwordHash = '';
+    if( !userData.type || userData.type==='local' ){
+        if( !userData.password ){
+            console.log( `[registerUser] invalid userData (need password)! `, userData );
+            return { message: "Invalid user password", id: "", name: "" };
+        }
+        const saltRounds = 10;    
+        passwordHash = await bcrypt.hash(userData.password, saltRounds);
+        console.log( `[registerUser] (hash=${passwordHash}) req.body:`, userData );
+        userData.type = 'local';
+    }
+
     console.log( `[registerUser], userData: `, userData );
-    const saltRounds = 10;
- 
-    const passwordHash = await bcrypt.hash(userData.password, saltRounds);
-    console.log( `[registerUser] (hash=${passwordHash}) req.body:`, userData );
     const saveData = {
        name: userData.name,
        email: userData.email,
-       password: passwordHash
+       password: passwordHash,
+       type: userData.type,
+       session
     };
+
     const dbUser = new db.users( saveData );
     const saveUser = await dbUser.save();
-    return { message: "User successfully saved", id: saveUser._id, name };
+    return { 
+        message: "User successfully saved", 
+        id: saveUser._id, 
+        name: saveUser.name,
+        email: saveUser.email };
  }
 
 // input: email, password
 // output: <object> { userId, firstName, lastName, emailAddress, creationTime } || false
 async function loginUser( email, password ) {
-   const userFetch = await db.users.findOne({ emailAddress: email });
-   console.log( `[loadUser] email='${email}' userFetch:`, userFetch );
-   if( !userFetch ) {
-      return false;
-   }
+    const userData = await db.users.findOne({ email: email });
+    console.log( `[loadUser] email='${email}' userData:`, userData );
+    if( !userData ) {
+        return { error: "Invalid password" };
+    }
 
-   const isValidPassword = await bcrypt.compare( password, userFetch.userPassword );
-   console.log( ` [loginUser] checking password (password: ${password} ) hash(${userFetch.userPassword})`, isValidPassword );
-   if( !isValidPassword ) {
-      return false;
-   }
+    const isValidPassword = await bcrypt.compare( password, userData.password );
+    console.log( ` [loginUser] checking password (password: ${password} ) hash(${userData.password})`, isValidPassword );
+    if( !isValidPassword ) {
+        return { error: "Invalid password" };
+    }
 
-   // remap the data into the specified fields as we are using camelCase
-   const userData = {
-      userId: userFetch._id,
-      firstName: userFetch.firstName,
-      lastName: userFetch.lastName,
-      emailAddress: userFetch.emailAddress,
-      creationTime: userFetch.createdAt
-   };
-   return userData;
+    // create a new session for this user and save it.
+    userData.session = uuid.v4();
+
+    // update the session
+    // remove entries before we do teh update
+    delete userData.createdAt;
+    delete userData.updatedAt;
+    const dbResult = await db.users.findOneAndUpdate( 
+       { _id: userData._id}, 
+       userData );
+
+    // remap the data into the specified fields as we are using camelCase
+    return {
+        id: userData._id,
+        name: userData.name,
+        email: userData.email,
+        session: userData.session,
+        createdAt: userData.createdAt
+    };
+}
+
+// input: session
+// output: boolean
+async function checkSession( session ){
+    const userData = await db.users.findOne({ session });
+    console.log( `[checkSession] session(${session}) -> valid? ${userData._id ? true : false}` );
+    return( userData._id ? true : false );
+}
+
+// input: session
+// output: boolean
+async function logoutUser( session ){
+    const userData = await db.users.findOneAndDelete({ session });
+    console.log( `[logoutUser] session(${session})`, userData );
+    return true; //( userData._id ? true : false );
 }
 
 // input: userId, thumbId
@@ -158,5 +200,7 @@ module.exports = {
    addToCart,
    removeFromCart,
    registerUser,
-   loginUser
+   loginUser,
+   checkSession,
+   logoutUser
 };

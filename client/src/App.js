@@ -10,6 +10,8 @@ import SettingsPage from './components/SettingsPage';
 import ProductAddPage from './components/ProductAddPage';
 import CartPage from './components/CartPage';
 import RegisterPage from './components/RegisterPage';
+import LoginPage from './components/LoginPage';
+import LogoutPage from './components/LogoutPage';
 import Footer from './components/Footer';
 
 /* Our EVEREST App 
@@ -33,7 +35,9 @@ function App() {
             <Route path="/productinfo/:id" component={ProductInfoPage} />
             <Route exact path="/productadd" component={ProductAddPage} />
             <Route exact path="/cart" component={CartPage} />
-            <Route exact path="/registeruser" component={RegisterPage} />
+            <Route exact path="/register" component={RegisterPage} />
+            <Route exact path="/login" component={LoginPage} />
+            <Route exact path="/logout" component={LogoutPage} />
             <Route exact path="/settings" component={SettingsPage} />
           </div>
 
