@@ -80,6 +80,11 @@ app.post('/api/user/logout', needSession, async function( req,res ){
 });
 
 
+// to allow the react url rewriting we need this
+app.get('/*', function (req, res) {
+    res.sendFile(`${__dirname}/build/index.html`);
+  });
+
 app.listen( PORT, function(){
     console.log( `[everest server] RUNNING, http://localhost:${PORT}` );
  });
