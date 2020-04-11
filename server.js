@@ -8,7 +8,8 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 // const upload = require('multer')({ dest: 'public/uploads/' });
 
-if( !fs.existsSync('.env') ){
+// PORT is only set by Heroku, else we know it's local
+if( !process.env.PORT && !fs.existsSync('.env') ){
     console.log( `*ERROR* You need a .env file (with DB_NAME,...)` );
     process.exit();
 }
