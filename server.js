@@ -14,7 +14,10 @@ if( !process.env.PORT && !fs.existsSync('.env') ){
     process.exit();
 }
 
+// to server any static files in client/buidl
+// note we do a /* at end for react URL re-writing
 app.use( express.static('client/build/') );
+// for post requests
 app.use( express.urlencoded({ extended: false }) );
 app.use( express.json() );
 
@@ -36,6 +39,7 @@ async function needSession(req, res, next){
 }
 
 
+// ENDPOINTS
 app.get('/api/product/list', needSession, async function( req,res ){
     console.log( `[product/list] ` );
     const products = JSON.parse( fs.readFileSync( "db/products.json" ) );
@@ -82,6 +86,7 @@ app.post('/api/user/logout', needSession, async function( req,res ){
 
 // to allow the react url rewriting we need this
 app.get('/*', function (req, res) {
+    console.log( `[/*] sending file: ${__dirname}/client/build/index.html` )
     res.sendFile(`${__dirname}/build/index.html`);
   });
 
