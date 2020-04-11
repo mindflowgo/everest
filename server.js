@@ -87,7 +87,7 @@ app.post('/api/user/logout', needSession, async function( req,res ){
 // to allow the react url rewriting we need this
 app.get('/*', function (req, res) {
     console.log( `[/*] sending file: ${__dirname}/client/build/index.html` )
-    res.sendFile(`${__dirname}/build/index.html`);
+    res.sendFile(`${__dirname}/client/build/index.html`);
   });
 
 app.listen( PORT, function(){
