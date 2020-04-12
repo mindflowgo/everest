@@ -1,11 +1,13 @@
 import React, { useState, useRef } from "react";
 import { Redirect } from 'react-router-dom';
+import { useGlobalStore } from "./GlobalStore";
+import API from "./API";
 
 function RegisterPage(){
     // DECLARATIVE FORM OF PROGRAMMING
+    const [ globalData, dispatch ] = useGlobalStore();
     const [ userData, setUserData ] = useState({ name: "", email: "", password: ""});
     const [ isRegistered, setIsRegistered ] = useState( false );
-    const [ alertMessage, setAlertMessage ] = useState( { type: "", message: ""} );
 
     const inputEmail = useRef();
     const inputPassword = useRef();
@@ -19,64 +21,47 @@ function RegisterPage(){
     async function registerUser( e ){
         e.preventDefault();
         
-        if( userData.email === "" ) {
+        if( userData.email.trim() === "" ||
+            !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userData.email)) ) {
             inputEmail.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide your Email!' } );
-            return;
-        }
-    
-        if( !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userData.email)) ) {
-            inputEmail.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a valid Email!' } );
+            dispatch( { do: 'setMessage', type: 'danger', message: 'Please provide a valid email' } );
             return;
         }
 
-        if( userData.password === "" ) {
+        if( userData.password.trim() === "" ) {
             inputPassword.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a password!' } );
+            dispatch( { do: 'setMessage', type: 'danger', message: 'Please provide a password' } );
             return;
         }
 
-        if( userData.password.length < 8 ) {
+        if( userData.password.trim().length < 8 ) {
             inputPassword.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide a longer password (8 characters min)!' } );
+            dispatch( { do: 'setMessage', type: 'danger', message: 'Please provide a longer password (8 characters min)!' } );
             return;
         }
 
-        const apiResult = await fetch('/api/user/register', 
-            {   method: 'post',
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-          }).then( result=>result.json())
+        const apiResult = await API.post('/api/user/register', userData);
                   
-        if( apiResult.message ){
-            setAlertMessage( { type: 'success', message: 'Thank you successfully registered!' } );
-            // remember the email
-            localStorage.email = apiResult.email;
-            setTimeout( function(){ setIsRegistered(true); }, 5000 );
-        } else {
-            setAlertMessage( { type: 'danger', message: apiResult.error } );
+        if( apiResult.error ){
+            dispatch( { do: 'setMessage', type: 'danger', message: apiResult.error } );
+            return;
         }
+
+        // remember the email
+        localStorage.email = apiResult.rememberMe ? apiResult.email : '';
+
+        dispatch( { do: 'setMessage', type: 'success', message: 'Thank you successfully registered' } );
+
+        // let the message sit for a bit then redirect to login
+        setTimeout( function(){ setIsRegistered(true); }, 5000 );
     }
 
     return (
         <div>
             { isRegistered ? <Redirect to='/login' /> : '' }
 
-            <div className={ alertMessage.type ? `alert alert-${alertMessage.type}` : 'd-hide' } role="alert">
-                {alertMessage.message}
-            </div>
-            <section class="jumbotron text-center">
             <div class="container">
                 <h1>User Registration</h1>
-                <p class="lead text-muted">Register and go shopping!</p>
-            </div>
-            </section>
-        
-            <div class="container">
                 <div class="card">
                     <div class="card-header">
                     Register

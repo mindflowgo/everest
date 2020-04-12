@@ -1,30 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { useGlobalStore } from "./GlobalStore";
 import { Redirect } from 'react-router-dom';
+import API from "./API";
 
-let showTimeout;
+let showTimeout,serverInterval;
 
 /* activePage  | changePage-call-back */
 function NavBar() {
   const [showMenu, setShowMenu] = useState(false);
-  const [ session ] = useState( localStorage.session );
-  const [ globalData ] = useGlobalStore();
+  const [ invalidSession, setInvalidSession ] = useState( false );
+  const [ globalData, dispatch ] = useGlobalStore();
 
   const location = useLocation();
   const style = {
       logo: { width: '64px', height: '64px' }
   }
 
+  function checkSession(){
+    // force redirection if no session & yet not login/reg pages
+    const isSessionExisting = localStorage.session && localStorage.session.length===36;
+    const isUrlNotRequiringLogin = location.pathname==='/login' || location.pathname==='/register';
+    console.log( `[Navbar] isSessionExisting(${isSessionExisting}) isUrlNotRequiringLogin(${isUrlNotRequiringLogin}): ${!isSessionExisting && !isUrlNotRequiringLogin}` );
+    setInvalidSession( !isSessionExisting && !isUrlNotRequiringLogin );
+  }
+
+  async function checkServer(){
+    try {
+      const apiServerStatus = await API.get(`/server-status`)
+      if( apiServerStatus.status==='running' ){
+        // if server status was not good before, then we probably have a message of this
+        // so clear it.
+        if( globalData.serverStatus !== 'running')
+          dispatch( { do: 'clearMessage' } );
+
+      } else {
+        dispatch( { do: 'setMessage', type: 'danger', message: apiServerStatus.error } );
+        console.log( `[App] Crap server is not running, show an error...` );
+      }
+    } catch( e ){
+      dispatch( { do: 'setMessage', type: 'danger', message: `Server down...` } );
+    }
+  }
+
+
+  useEffect( function(){
+    checkSession();
+
+    // and do a periodic check on the server, indicating a problem if server is down
+    setInterval( checkServer, 15000 );
+    checkServer();
+  }, [] );
+
   if( showMenu ){
     // hide the nav after 10s
     clearTimeout( showTimeout );
     showTimeout = setTimeout( function(){ setShowMenu( false ); }, 5000 );
   }
-
-  // force redirection if no session & yet not login/reg pages
-  const invalidSession = !(session && session.length===36) && !(location.pathname==='/login' || location.pathname==='/register');
-
+  
   const cartTotalQuantity = globalData.cart.reduce( (total,item) => total+item.num, 0 );
 
   return ( 
@@ -80,6 +113,11 @@ function NavBar() {
         </ul>
       </div>
     </nav>
+
+    {/* show a global message bar below the nav */}
+    <div className={ globalData.messageType ? `alert alert-${globalData.messageType}` : 'd-hide' } role="alert">
+        {globalData.message}
+    </div>
     </>
   );
 }

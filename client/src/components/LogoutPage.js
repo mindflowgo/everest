@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Redirect } from 'react-router-dom';
 import API from "./API";
+import { useGlobalStore } from "./GlobalStore";
 
 function LogoutPage(){
-    const [ isLoggedOut, setIsLoggedOut ] = useState( false );
-    const [ alertMessage, setAlertMessage ] = useState( { type: "", message: ""} );
+    const [ globalData, dispatch ] = useGlobalStore();
 
     useEffect( function(){
         // attempt to request logout (only once)
         logoutRequest();
         }, [] );
+
 
     // call the api to logout (and clear session)
     async function logoutRequest(){
@@ -18,28 +19,28 @@ function LogoutPage(){
                     
         console.log( `apiResult: `, apiResult );
 
+        // quit if error
         if( apiResult.error ){
-            setAlertMessage( { type: 'danger', message: apiResult.error } );
+            dispatch( { do: 'setMessage', type: 'danger', message: apiResult.error } );
             return;
-        };
+        }
 
-        setAlertMessage( { type: 'success', message: 'Logged out...' } );
+        dispatch( { do: 'setMessage', type: 'success', message: 'Logged out...' } );
 
         // save the active session
         localStorage.session = '';
 
-        setTimeout( function(){ setIsLoggedOut(true); }, 3000 );
+        setTimeout( function(){ 
+                dispatch( { do: 'loginState', loggedIn: false })
+            }, 3000 );
     }
     
 
     return (
         <div>
-            { isLoggedOut ? <Redirect to='/login' /> : '' }
+            { globalData.loggedIn ? '' : <Redirect to='/login' /> }
 
-            <div className={ alertMessage.type ? `alert alert-${alertMessage.type}` : 'd-hide' } role="alert">
-                {alertMessage.message}
-            </div>
-            <section class="jumbotron text-center">
+\            <section class="jumbotron text-center">
             <div class="container">
                 <p class="lead text-muted">Please wait, logging out...</p>
             </div>

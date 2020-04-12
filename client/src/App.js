@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import { GlobalStore } from "./components/GlobalStore";
-
 import NavBar from './components/NavBar';
 import ProductListPage from './components/ProductListPage';
 import ProductInfoPage from './components/ProductInfoPage';
@@ -14,16 +13,6 @@ import LoginPage from './components/LoginPage';
 import LogoutPage from './components/LogoutPage';
 import Footer from './components/Footer';
 
-/* Our EVEREST App 
-
-* added 'id' to product.json file (any different 3 ids)
-* added <Link> to the ProductCard
-
-Today's Mission:
-- Add Global Storage
-- Add Mongo
-
-*/
 function App() {
   return (
     <Router>

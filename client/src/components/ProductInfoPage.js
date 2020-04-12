@@ -18,6 +18,11 @@ function ProductInfoPage( props ){
 
     async function loadProduct( id ){  
         const apiProduct = await API.get(`/api/product/${id}`);
+
+        if( apiProduct.error ){
+            dispatch( { do: 'setMessage', type: 'danger', message: apiProduct.error } );
+            return;
+        }        
         setShowProduct( apiProduct );
     }
 

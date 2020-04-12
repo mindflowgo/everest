@@ -1,6 +1,7 @@
 require('dotenv').config(); // --> process.env
 const express = require( 'express' );
 const fs = require('fs');
+
 const orm = require( './db/orm.mongoose' );
 
 const PORT = process.env.PORT || 8080;
@@ -14,7 +15,7 @@ if( !process.env.PORT && !fs.existsSync('.env') ){
     process.exit();
 }
 
-// to server any static files in client/buidl
+// to server any static files in client/build
 // note we do a /* at end for react URL re-writing
 app.use( express.static('client/build/') );
 // for post requests
@@ -29,6 +30,7 @@ async function needSession(req, res, next){
     if( !req.headers.session || 
         req.headers.session.length!==36 || 
         !(await orm.checkSession( req.headers.session )) ){
+
         console.log( `[middleware:session] invalid session, indicating redirect` );
         res.status(500).send( { error: "invalid session" } );
         return;
@@ -39,7 +41,7 @@ async function needSession(req, res, next){
 }
 
 
-// ENDPOINTS
+// ENDPOINTS      /---> next()
 app.get('/api/product/list', needSession, async function( req,res ){
     console.log( `[product/list] ` );
     const products = JSON.parse( fs.readFileSync( "db/products.json" ) );
@@ -83,6 +85,9 @@ app.post('/api/user/logout', needSession, async function( req,res ){
     res.send( logoutResult );
 });
 
+app.get('/server-status', function(req, res){
+    res.send({ status: 'running', time: Date.now() });
+});
 
 // to allow the react url rewriting we need this
 app.get('/*', function (req, res) {

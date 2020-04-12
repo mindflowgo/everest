@@ -3,7 +3,6 @@ import ProductCartRow from "./ProductCartRow";
 import { useGlobalStore } from "./GlobalStore";
 
 function CartPage( props ){
-    const [ products, setProducts ]= useState([]);
     const [ globalData, dispatch ] = useGlobalStore();
 
     return (

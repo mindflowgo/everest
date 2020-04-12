@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import { Redirect } from 'react-router-dom';
 import API from "./API";
+import { useGlobalStore } from "./GlobalStore";
 
 function LoginPage(){
     // DECLARATIVE FORM OF PROGRAMMING
     const [ userData, setUserData ] = useState({ name: "", email: localStorage.email, password: "", rememberMe: true });
-    const [ isLoggedIn, setIsLoggedIn ] = useState( false );
-    const [ alertMessage, setAlertMessage ] = useState( { type: "", message: ""} );
+    const [ globalData, dispatch ] = useGlobalStore();
 
     const inputEmail = useRef();
     const inputPassword = useRef();
@@ -26,42 +26,42 @@ function LoginPage(){
         
         if( userData.email === "" ) {
             inputEmail.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide your Email!' } );
+            dispatch( { do: 'setMessage', type: 'danger', message: 'Please enter your email!' } );
             return;
         }
     
         if( userData.password === "" || userData.password.length < 8 ) {
             inputPassword.current.focus();
-            setAlertMessage( { type: 'danger', message: 'Please provide your password!' } );
+            dispatch( { do: 'setMessage', type: 'danger', message: 'Please enter your password!' } );
             return;
         }
 
         const apiResult = await API.post( '/api/user/login', userData );
                   
-        if( !apiResult.session ){
-            setAlertMessage( { type: 'danger', message: apiResult.error } );
+        if( apiResult.error ){
+            dispatch( { do: 'setMessage', type: 'danger', message: apiResult.error } );
             // clear any session
             localStorage.session = '';
             return;
         };
 
-        setAlertMessage( { type: 'success', message: 'Loading, please wait...' } );
+        dispatch( { do: 'setMessage', type: 'success', message: 'Loading, please wait...' } );
 
         // remember the email (if checkbox toggled)
         localStorage.email =( apiResult.rememberMe ? apiResult.email : '' );
         // save the active session
         localStorage.session = apiResult.session;
 
-        setTimeout( function(){ setIsLoggedIn(true); }, 3000 );
+        setTimeout( function(){ 
+            dispatch( { do: 'clearMessage' } );
+            dispatch( { do: 'loginState', loggedIn: true })
+            }, 3000 );
     }
 
     return (
         <div>
-            { isLoggedIn ? <Redirect to='/productlist' /> : '' }
+            { globalData.loggedIn ? <Redirect to='/productlist' /> : '' }
 
-            <div className={ alertMessage.type ? `alert alert-${alertMessage.type}` : 'd-hide' } role="alert">
-                {alertMessage.message}
-            </div>
             <section class="jumbotron text-center">
             <div class="container">
                 <h1>Login</h1>

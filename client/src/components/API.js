@@ -1,7 +1,7 @@
 // simple wrapper around fetch to give session & do the JSON after 
 function get( url ){
     return fetch( url, 
-        { headers: { 'Session': localStorage.session } })
+        { headers: { 'Session': localStorage.session ? localStorage.session : '' } })
         .then( result=>result.json() );
 }
 
@@ -11,7 +11,7 @@ function post( url, userData ){
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
-                'Session': localStorage.session
+                'Session': localStorage.session ? localStorage.session : ''
             },
             body: JSON.stringify(userData)
         }).then( result=>result.json());
