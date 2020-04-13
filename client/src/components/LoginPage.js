@@ -69,6 +69,7 @@ function LoginPage(){
         <div>
             { globalData.loggedIn ? <Redirect to='/productlist' /> : '' }
 
+            <hr />
             <h1>Login</h1>
         
             <div class="container">
