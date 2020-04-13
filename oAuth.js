@@ -1,7 +1,8 @@
-const cors = require('cors');
-const http = require('http');
-const socketio = require('socket.io');
+const cors = require('cors')
+const http = require('http')
+const socketio = require('socket.io')
 const passport = require('passport')
+const session = require('express-session')
 const { Strategy: TwitterStrategy } = require('passport-twitter')
 const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth')
 const { Strategy: FacebookStrategy } = require('passport-facebook')
@@ -18,7 +19,10 @@ function oAuth( app, API_URL ){
     // we need to enable API calls from OUTSIDE our system
     // as the oAuth will be coming from another server
     app.use( cors() );
-        
+    
+    // oAuth requires session-library
+    app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }))
+
     app.use(passport.initialize())
     // Allowing passport to serialize and deserialize users into sessions
     passport.serializeUser((user, cb) => cb(null, user))
