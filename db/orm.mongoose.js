@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const bcrypt = require ( 'bcrypt' );
-const uuid = require( 'uuid/v4' );
 
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
 
@@ -88,7 +87,7 @@ async function getThumbnail( thumbId ){
 // input: <object> { name, email, password }, session
 // output: { message, id, name }
 async function registerUser( userData, session='' ){
-    if( !userData.name || !userData.email ){
+    if( !userData.name || (userData.type==='local' && !userData.email) ){
         console.log( `[registerUser] invalid userData! `, userData );
         return { message: "Invalid user data", id: "", name: "" };
     }
@@ -106,13 +105,45 @@ async function registerUser( userData, session='' ){
     }
 
     console.log( `[registerUser], userData: `, userData );
+
+    
+
+    // check if user exists, and refuse for local users, and quietly change just session for other types
+    let duplicateUser = { _id: false }
+    if( !userData.authId ){
+         duplicateUser = await db.users.findOne({ email: userData.email });
+
+         if( duplicateUser._id ){
+            return {
+               error: "Duplicate email, try another or login"
+            }
+         }
+    } else {
+         duplicateUser = await db.users.findOne({ authId: userData.authId });
+
+         if( duplicateUser._id ){
+            const saveUser = await db.users.findByIdAndUpdate( { _id: duplicateUser._id }, { session } );
+            console.log( `   -> duplicate user (ie they've logged in before via oAuth), just update session: ${session}`, saveUser)
+            return { 
+               message: "User updated", 
+               id: saveUser._id, 
+               name: saveUser.name,
+               email: saveUser.email,
+               thumbnail: saveUser.thumbnail 
+            };
+         }
+    }
+
+
     const saveData = {
-       name: userData.name,
-       email: userData.email,
-       password: passwordHash,
-       type: userData.type,
-       session
-    };
+      name: userData.name,
+      email: userData.email || '',
+      thumbnail: userData.thumbnail || '',
+      authId: userData.authId || '',
+      password: passwordHash,
+      type: userData.type,
+      session
+   };    
 
     const dbUser = new db.users( saveData );
     const saveUser = await dbUser.save();
@@ -120,17 +151,21 @@ async function registerUser( userData, session='' ){
         message: "User successfully saved", 
         id: saveUser._id, 
         name: saveUser.name,
-        email: saveUser.email };
+        email: saveUser.email,
+        thumbnail: saveUser.thumbnail 
+      };
  }
 
 // input: email, password
 // output: <object> { userId, firstName, lastName, emailAddress, creationTime } || false
-async function loginUser( email, password ) {
+async function loginUser( email, password, session ) {
+   if( !session )
+      return { error: "System error (session-not-given)" };
+
     const userData = await db.users.findOne({ email: email });
     console.log( `[loadUser] email='${email}' userData:`, userData );
-    if( !userData ) {
+    if( !userData )
         return { error: "Invalid password" };
-    }
 
     const isValidPassword = await bcrypt.compare( password, userData.password );
     console.log( ` [loginUser] checking password (password: ${password} ) hash(${userData.password})`, isValidPassword );
@@ -138,8 +173,8 @@ async function loginUser( email, password ) {
         return { error: "Invalid password" };
     }
 
-    // create a new session for this user and save it.
-    userData.session = uuid();
+    // add the suggested session to the user.
+    userData.session = session;
 
     // update the session
     // remove entries before we do teh update
@@ -154,6 +189,7 @@ async function loginUser( email, password ) {
         id: userData._id,
         name: userData.name,
         email: userData.email,
+        thumbnail: userData.thumbnail,
         session: userData.session,
         createdAt: userData.createdAt
     };

@@ -1,21 +1,16 @@
 import React, { useEffect } from 'react'
-import io from 'socket.io-client'
-const API_URL = window.location.protocol+'//'+window.location.host;
+const API_URL = window.location.protocol+'//'+window.location.host.replace('localhost:3000','localhost:8080');
 
-let socket;
 let oAuthWindow;
 let oAuthPending = false;
 
 function OAuth( props ){
     useEffect( function(){
-        console.log( `[OAuth] component load: API_URL(${API_URL})` )
-        socket = io(API_URL)
-
-        // once we got a socket connection, we know the user must have logged-in
-        socket.on(`oauth_result`, user => {  
-            oAuthWindow.close()
-            console.log( `[oAuth complete: user: ]`, user );
-        })
+        // listen for message from popup window
+        window.addEventListener('message', function(e) {
+            console.log(`received message: `, e.data);
+            if( oAuthWindow ) oAuthWindow.close();
+        } , false);
     }, [] );
      
     function openOAuth( client ) {
@@ -25,7 +20,7 @@ function OAuth( props ){
         const width = 600, height = 600
         const left = (window.innerWidth / 2) - (width / 2)
         const top = (window.innerHeight / 2) - (height / 2)
-        const url = `${API_URL}/oauth/${client}?socketId=${socket.id}`
+        const url = `${API_URL}/oauth/${client}`
         console.log( `[openOAuth] opening url: ${url}`)
         oAuthWindow =  window.open(url, '',       
           `toolbar=no, location=no, directories=no, status=no, menubar=no, 

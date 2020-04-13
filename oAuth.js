@@ -1,6 +1,4 @@
 const cors = require('cors')
-const http = require('http')
-const socketio = require('socket.io')
 const passport = require('passport')
 const session = require('express-session')
 const { Strategy: TwitterStrategy } = require('passport-twitter')
@@ -10,11 +8,8 @@ const { Strategy: GithubStrategy} = require('passport-github')
 
 // include server-side code for oAuth
 // require('./oAuth')(app);
-function oAuth( app, API_URL ){
+function oAuth( app, API_URL, providers, createOAuthSession ){
     console.log( `[oAuth] adding oAuth related endpoints & middleware` );
-
-    const server = http.createServer(app);
-    const io = socketio(server);
 
     // we need to enable API calls from OUTSIDE our system
     // as the oAuth will be coming from another server
@@ -22,7 +17,7 @@ function oAuth( app, API_URL ){
     
     // oAuth requires session-library
     app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }))
-
+  
     app.use(passport.initialize())
     // Allowing passport to serialize and deserialize users into sessions
     passport.serializeUser((user, cb) => cb(null, user))
@@ -33,7 +28,6 @@ function oAuth( app, API_URL ){
 
     // setup & call the passport pre-defined 'strategies' for each oAuth option 
     // we have valid keys for
-    const providers = ['twitter','google','facebook','github'];
     providers.map( provider=>{
         if( process.env[`${provider.toUpperCase()}_KEY`] ){
             console.log( `   > found ** ${provider} ** KEY, Added!`)
@@ -45,20 +39,19 @@ function oAuth( app, API_URL ){
             }
             switch( provider ){
                 case 'twitter':
-                    CONFIG.consumerKey = CONFIG.clientID;
-                    CONFIG.consumerSecret = CONFIG.clientSecret;
-                    passport.use(new TwitterStrategy(CONFIG, callback));
+                    CONFIG.consumerKey = CONFIG.clientID
+                    CONFIG.consumerSecret = CONFIG.clientSecret
+                    passport.use(new TwitterStrategy(CONFIG, callback))
                     break;
                 case 'google':
-                    console.log( `   .. CONFIG:`+JSON.stringify(CONFIG) )
-                    passport.use(new GoogleStrategy(CONFIG, callback));
+                    passport.use(new GoogleStrategy(CONFIG, callback))
                     break;
                 case 'facebook':
-                    CONFIG.profileFields = ['id', 'emails', 'name', 'picture.width(250)'];
-                    passport.use(new FacebookStrategy(CONFIG, callback));
+                    CONFIG.profileFields = ['id', 'emails', 'name', 'picture.width(250)']
+                    passport.use(new FacebookStrategy(CONFIG, callback))
                     break;
                 case 'github':
-                    passport.use(new GithubStrategy(CONFIG, callback));
+                    passport.use(new GithubStrategy(CONFIG, callback))
                     break;
             }
         }
@@ -76,32 +69,44 @@ function oAuth( app, API_URL ){
             // we are running this, as it will generate code an actual function
             passport.authenticate(provider)(req,res,next);
         }, 
-        function( req,res,next ){
+        // chain a SECOND function on that handles the call-back result
+        async function( req,res,next ){
             const provider = req.params.provider;
-            const socketId = req.query.socketId; // passed with the first popup as a ?socketId=
-            console.log( `[/oauth/:provider/callback] provider(${provider}) socketId(${socketId})` );
+            console.log( `[/oauth/${provider}/callback] writing result to DB & passing back opener` );
 
             // make the returned user structure consistent
-            let user;
+            let user = { type: provider };
             switch( provider ){
                 case 'twitter':
-                    user = { name: req.user.username, photo: req.user.photos[0].value.replace(/_normal/, '') }
+                    user.name       = req.user.displayName ? req.user.displayName : req.user.username
+                    user.thumbnail  = req.user.photos[0].value.replace(/_normal/, '')
+                    user.authId     = `twitterid:${req.user.id}`
                     break
                 case 'google':
-                    user = { name: req.user.displayName, photo: req.user.photos[0].value.replace(/sz=50/gi, 'sz=250') }
+                    user.name       = req.user.displayName
+                    user.thumbnail  = req.user.photos[0].value.replace(/sz=50/gi, 'sz=250')
+                    user.authId     = `googleid:${req.user.id}`
                     break
                 case 'facebook':
-                    user = { name: `${req.user.name.givenName} ${req.user.name.familyName}`, photo: req.user.photos[0].value }
+                    user.name       = `${req.user.name.givenName} ${req.user.name.familyName}`
+                    user.thumbnail  = req.user.photos[0].value
+                    user.authId     = `facebookid:${req.user.id}`
                     break
                 case 'github':
-                    user = { name: req.user.username, photo: req.user.photos[0].value }
+                    user.name       = req.user.username
+                    user.thumbnail  = req.user.photos[0].value
+                    user.authId     = `githubid:${req.user.id}`
                     break
                 default:
                     console.log( `[ERROR] Unknown provider ${provider}` )
                     break
             }
-            io.in(socketId).emit('oauth_result', user)
-            res.end()
+
+            // create a session for this user
+            const session = await createOAuthSession( user );
+
+            // notify the calling (parent) window, and give our session + user info
+            res.send(`<html><body><script>window.opener.postMessage('session:${session}', '*');</script>Please wait...</body></html>`);
         })
 
 }

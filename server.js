@@ -1,6 +1,7 @@
 require('dotenv').config(); // --> process.env
 const express = require( 'express' );
 const fs = require('fs');
+const uuid = require( 'uuid' );
 
 const orm = require( './db/orm.mongoose' );
 
@@ -43,8 +44,18 @@ async function needSession(req, res, next){
 }
 
 
-// oAuth
-require('./oAuth')(app, API_URL);
+async function createOAuthSession( userData ){
+    console.log( `[createOAuthSession]`, userData );
+    
+    // register user in system (if they aren't there, and get the associated session)
+    const session = uuid.v4();
+    const registerResult = await orm.registerUser( userData, session );
+
+    // returns the session
+    return session;
+}
+// oAuth - list providers we'll accept .env info for
+require('./oAuth')(app, API_URL, ['twitter','google','facebook','github'], createOAuthSession);
 
 // ENDPOINTS      /---> next()
 app.get('/api/product/list', needSession, async function( req,res ){
@@ -79,7 +90,8 @@ app.post('/api/user/register', async function( req,res ){
 app.post('/api/user/login', async function( req,res ){
     const userData = req.body;
     console.log( `[POST: /api/user/login] userData: `, userData );
-    const loginResult = await orm.loginUser( userData.email, userData.password );
+    const session = uuid.v4();
+    const loginResult = await orm.loginUser( userData.email, userData.password, session );
     loginResult.rememberMe = req.body.rememberMe;
     res.send( loginResult );
 });

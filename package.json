@@ -21,7 +21,6 @@
     "passport-github": "^1.1.0",
     "passport-google-oauth": "^2.0.0",
     "passport-twitter": "^1.0.4",
-    "socket.io": "^2.3.0",
     "uuid": "^7.0.3"
   }
 }
