@@ -5,6 +5,8 @@ const fs = require('fs');
 const orm = require( './db/orm.mongoose' );
 
 const PORT = process.env.PORT || 8080;
+const API_URL = process.env.NODE_ENV === 'production'
+    ? 'https://everestapp.herokuapp.com' : 'http://localhost:8080';
 
 const app = express();
 // const upload = require('multer')({ dest: 'public/uploads/' });
@@ -32,7 +34,7 @@ async function needSession(req, res, next){
         !(await orm.checkSession( req.headers.session )) ){
 
         console.log( `[middleware:session] invalid session, indicating redirect` );
-        res.status(500).send( { error: "invalid session" } );
+        res.status(403).send( { error: "Endpoint requires valid session" } );
         return;
     }
 
@@ -40,6 +42,9 @@ async function needSession(req, res, next){
     next();
 }
 
+
+// oAuth
+require('./oAuth')(app, API_URL);
 
 // ENDPOINTS      /---> next()
 app.get('/api/product/list', needSession, async function( req,res ){
@@ -89,9 +94,10 @@ app.get('/server-status', function(req, res){
     res.send({ status: 'running', time: Date.now() });
 });
 
-// to allow the react url rewriting we need this
+// to allow the react url rewriting (in production), we must pass all
+// wildcard unknown URLs to react (ex. /productlist)
 app.get('/*', function (req, res) {
-    console.log( `[/*] sending file: ${__dirname}/client/build/index.html` )
+    console.log( `[/*] (${req.protocol}//${req.get('host')}/${req.originalUrl} -- sending file: ${__dirname}/client/build/index.html` )
     res.sendFile(`${__dirname}/client/build/index.html`);
   });
 
