@@ -65,18 +65,14 @@ function oAuth( app, API_URL, providers, createOAuthSession ){
    app.get( '/oauth/:provider', function( req,res,next ){
       const provider = req.params.provider;
       // we are running this, as it will generate code an actual function
-      if( provider==='google') { // google news one more field, others dont
-         passport.authenticate('google', { scope: ['profile'] });
-      } else {
-         passport.authenticate(provider)(req,res,next);
-      }
+      passport.authenticate(provider, (provider==='google'?{ scope: ['profile'] }:undefined))(req,res,next);
    });
 
    // this is called BY the provider with the auth-token + access-token + user-info for us
    app.get('/oauth/:provider/callback', function( req,res,next ){
       const provider = req.params.provider;
       // we are running this, as it will generate code an actual function
-      passport.authenticate(provider)(req,res,next);
+      passport.authenticate(provider, (provider==='google'?{ scope: ['profile'] }:undefined))(req,res,next);
    },
    // chain a SECOND function on that handles the call-back result
    async function( req,res ){
