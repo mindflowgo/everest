@@ -22,6 +22,22 @@ function LoginPage(){
         setUserData( { ...userData, rememberMe: !userData.rememberMe } );
     }
 
+    function loginComplete( loginData ){        
+        dispatch( { do: 'setMessage', type: 'success', message: loginData.message } );
+        delete loginData.message;
+
+        // save the active session
+        localStorage.session = loginData.session;
+
+        // remember the user session + data
+        dispatch( { do: 'setUserData', data: loginData } );
+
+        setTimeout( function(){ 
+            dispatch( { do: 'clearMessage' } );
+            dispatch( { do: 'loginState', loggedIn: true })
+            }, 3000 );
+    }
+
     async function loginUser( e ){
         e.preventDefault();
         
@@ -46,32 +62,17 @@ function LoginPage(){
             return;
         };
 
-        dispatch( { do: 'setMessage', type: 'success', message: 'Loading, please wait...' } );
-
-        // remember the email (if checkbox toggled)
-        localStorage.email =( apiResult.rememberMe ? apiResult.email : '' );
-        // save the active session
-        localStorage.session = apiResult.session;
-
-        setTimeout( function(){ 
-            dispatch( { do: 'clearMessage' } );
-            dispatch( { do: 'loginState', loggedIn: true })
-            }, 3000 );
+        loginComplete( apiResult );
     }
 
     return (
         <div>
             { globalData.loggedIn ? <Redirect to='/productlist' /> : '' }
 
-            <section class="jumbotron text-center">
-            <div class="container">
-                <h1>Login</h1>
-                <p class="lead text-muted">Register and go shopping!</p>
-            </div>
-            </section>
+            <h1>Login</h1>
         
             <div class="container">
-                <OAuth providers={['twitter','facebook','github','google']} />
+                <OAuth providers={['twitter','facebook','github','google']} loginComplete={loginComplete} />
                 <div class="card">
                     <div class="card-body">
                     <form role="form">

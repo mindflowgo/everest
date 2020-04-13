@@ -8,8 +8,14 @@ function OAuth( props ){
     useEffect( function(){
         // listen for message from popup window
         window.addEventListener('message', function(e) {
-            console.log(`received message: `, e.data);
+            // only listen to JSON messages
+            if( !e.data || e.data.substr(0,1)!=='{' || e.data.substr(-1,1)!=='}' ) return;
+
+            const loginData = JSON.parse(e.data);
+            console.log(`received message: `, loginData);
             if( oAuthWindow ) oAuthWindow.close();
+            // pass back the login info
+            if( props.loginComplete ) props.loginComplete(loginData);
         } , false);
     }, [] );
      
@@ -42,13 +48,15 @@ function OAuth( props ){
     }
     
     return (
-        <div>
-            {props.providers.map( provider=>
+        <div class="card">
+            <div class="card-body d-flex justify-content-center">
+                {props.providers.map( provider=>
 
-                <button onClick={()=>openOAuth(provider)} class='btn btn-outline-primary' style={{marginRight:'10px'}}>
-                    <i className={`fab fa-${provider}${provider==='google'?'-plus':''}-square fa-3x`}></i>
-                </button>
-            )}
+                    <button onClick={()=>openOAuth(provider)} class='btn btn-outline-primary' style={{marginRight:'10px'}}>
+                        <i className={`fab fa-${provider}${provider==='google'?'-plus':''}-square fa-3x`}></i>
+                    </button>
+                )}
+            </div>
         </div>
     )
 }

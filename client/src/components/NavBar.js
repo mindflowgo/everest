@@ -5,10 +5,11 @@ import { Redirect } from 'react-router-dom';
 import API from "./API";
 
 let showTimeout,serverInterval;
+let prevLocation;
 
 /* activePage  | changePage-call-back */
 function NavBar() {
-  const [showMenu, setShowMenu] = useState(false);
+  const [ showMenu, setShowMenu ] = useState( false );
   const [ invalidSession, setInvalidSession ] = useState( false );
   const [ globalData, dispatch ] = useGlobalStore();
 
@@ -55,9 +56,18 @@ function NavBar() {
   if( showMenu ){
     // hide the nav after 10s
     clearTimeout( showTimeout );
-    showTimeout = setTimeout( function(){ setShowMenu( false ); }, 5000 );
+    showTimeout = setTimeout( function(){ setShowMenu( false ); }, 2000 );
   }
-  
+
+  // if we change locations, hide menu immediately
+  if( prevLocation!==location.pathname ){
+    console.log( `**** > location changed, hiding menu`)
+    clearTimeout( showTimeout );
+    showTimeout = setTimeout( function(){ setShowMenu( false ); }, 100 );
+    // setShowMenu( false );
+    prevLocation = location.pathname;
+  }
+
   const cartTotalQuantity = globalData.cart.reduce( (total,item) => total+item.num, 0 );
 
   return ( 
@@ -114,10 +124,14 @@ function NavBar() {
       </div>
     </nav>
 
-    {/* show a global message bar below the nav */}
-    <div className={ globalData.messageType ? `alert alert-${globalData.messageType}` : 'd-hide' } role="alert">
-        {globalData.message}
-    </div>
+    <div class='container'>
+      {/* show user session info */}
+      <div class='d-block'>{ globalData.thumbnail ? <img src={globalData.thumbnail} id='navThumbnail' /> : '' } Welcome {globalData.name}</div>
+      {/* show a global message bar below the nav */}
+      <div className={ globalData.messageType ? `alert alert-${globalData.messageType}` : 'd-hide' } role="alert">
+          {globalData.message}
+      </div>
+    </div>      
     </>
   );
 }

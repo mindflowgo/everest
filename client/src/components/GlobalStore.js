@@ -39,9 +39,12 @@ function dispatcher(state,action){
             newState.loggedIn = action.loggedIn;
             return newState;
 
-        
+        case 'setUserData':
+            newState = {...newState, ...action.data };
+            return newState;
+
         default:
-            console.log( `crap sorry, dunno what to do: ${action.do}` );
+            console.log( `[ERROR] Sorry, unknown do-action: ${action.do}` );
         break;
     }
 }
