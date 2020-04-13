@@ -8,8 +8,9 @@ function OAuth( props ){
     useEffect( function(){
         // listen for message from popup window
         window.addEventListener('message', function(e) {
-            // only listen to JSON messages
-            if( !e.data || e.data.substr(0,1)!=='{' || e.data.substr(-1,1)!=='}' ) return;
+            // only listen to JSON messages, ignore rest
+            if( !(e && e.data && typeof(e.data)==='string' && e.data.substr(0,1)==='{' && e.data.substr(-1,1)==='}') ) 
+                return;
 
             const loginData = JSON.parse(e.data);
             console.log(`received message: `, loginData);
