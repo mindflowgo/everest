@@ -13,13 +13,18 @@ function OAuth( props ){
                 return;
 
             const loginData = JSON.parse(e.data);
-            console.log(`received message: `, loginData);
+            console.log(`<< from popup window, received:`, loginData);
             if( oAuthWindow ) oAuthWindow.close();
             // pass back the login info
             if( props.loginComplete ) props.loginComplete(loginData);
         } , false);
     }, [] );
      
+    /* 
+    >> everestapp.herokuapp.com/oauth/twitter -> [passport plugin] -> api.twitter.com/oauth/....
+    << everestapp.herokuapp.com/oauth/twitter/callback with user-name + thumnbail + access-token
+       JSON string with information that we can pass to the parent window
+    */
     function openOAuth( client ) {
         if (oAuthPending) return;
 
@@ -47,14 +52,20 @@ function OAuth( props ){
           }
         }, 1000)
     }
-    
+    const icons = {
+        facebook: "fa-facebook-square",
+        twitter: "fa-twitter-square",
+        google: "fa-google-plus-square",
+        github: "fa-github-square",
+        linkedin: "fa-linkedin"
+    }
     return (
         <div class="card">
             <div class="card-body d-flex justify-content-center">
                 {props.providers.map( provider=>
 
                     <button onClick={()=>openOAuth(provider)} class='btn btn-outline-primary' style={{marginRight:'10px'}}>
-                        <i className={`fab fa-${provider}${provider==='google'?'-plus':''}-square fa-3x`}></i>
+                        <i className={`fab ${icons[provider]} fa-3x`}></i>
                     </button>
                 )}
             </div>

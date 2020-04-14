@@ -73,7 +73,7 @@ function LoginPage(){
             <h1>Login</h1>
         
             <div class="container">
-                <OAuth providers={['twitter','facebook','github','google']} loginComplete={loginComplete} />
+                <OAuth providers={['twitter','facebook','github','google','linkedin']} loginComplete={loginComplete} />
                 <div class="card">
                     <div class="card-body">
                     <form role="form">

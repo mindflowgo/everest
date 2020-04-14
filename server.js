@@ -46,7 +46,7 @@ async function needSession(req, res, next){
 
 // OAUTH Authentication
 async function createOAuthSession( userData ){
-   console.log( '[createOAuthSession]', userData );
+   console.log( `[createOAuthSession] called for ${userData.name}` );
 
    // register user in system (if they aren't there, and get the associated session)
    const session = uuid.v4();
@@ -56,7 +56,7 @@ async function createOAuthSession( userData ){
    return authUserData;
 }
 // oAuth - list providers we'll accept .env info for
-require('./oAuth')(app, API_URL, ['twitter','google','facebook','github'], createOAuthSession);
+require('./oAuth')(app, API_URL, ['twitter','google','facebook','github','linkedin'], createOAuthSession);
 
 
 
