@@ -68,7 +68,7 @@ function NavBar() {
     prevLocation = location.pathname;
   }
 
-  const cartTotalQuantity = globalData.cart.reduce( (total,item) => total+item.num, 0 );
+  const cartTotalQuantity =( globalData && globalData.cart ? globalData.cart.reduce( (total,item) => total+item.num, 0 ) : 0 );
 
   return ( 
     <>
