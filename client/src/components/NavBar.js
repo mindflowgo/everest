@@ -126,7 +126,7 @@ function NavBar() {
 
     <div class='container'>
       {/* show user session info */}
-      <div class='d-block'>{ globalData.thumbnail ? <img src={globalData.thumbnail} id='navThumbnail' /> : '' } Welcome {globalData.name}</div>
+      { globalData.name ? <div class='d-block'>{ globalData && globalData.thumbnail ? <img src={globalData.thumbnail} id='navThumbnail' /> : '' } Welcome {globalData.name}</div> : '' }
       {/* show a global message bar below the nav */}
       <div className={ globalData.messageType ? `alert alert-${globalData.messageType}` : 'd-hide' } role="alert">
           {globalData.message}

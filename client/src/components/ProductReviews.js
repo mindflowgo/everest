@@ -4,7 +4,6 @@ import ProductReviewForm from "./ProductReviewForm";
 
 function ProductReviews( props ){
     const [ showForm, setShowForm ]= useState(false);
-    console.log( `[ProductReviews] showForm=`,showForm );
 
     function saveForm( e ){
         e.preventDefault();

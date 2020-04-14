@@ -106,7 +106,7 @@ async function registerUser( userData, session='' ){
       userData.type = 'local';
    }
 
-   console.log( '[registerUser], userData: ', userData );
+   console.log( `[registerUser], ${process.env.MONGODB_URI} userData: `, userData );
 
 
 
@@ -126,7 +126,7 @@ async function registerUser( userData, session='' ){
 
       if( duplicateUser && duplicateUser._id ){
          const saveUser = await db.users.findByIdAndUpdate( { _id: duplicateUser._id }, { session } );
-         console.log( `   -> duplicate user (ie they've logged in before via oAuth), just update session: ${session}`, saveUser);
+         console.log( `   -> duplicate user (_id:${duplicateUser._id}; ie they've logged in before via oAuth), just update session: ${session}`, saveUser);
          return {
             message: `Welcome back ${saveUser.name}`,
             id: saveUser._id,
@@ -152,16 +152,22 @@ async function registerUser( userData, session='' ){
 
    const dbUser = new db.users( saveData );
    const saveUser = await dbUser.save();
-   return {
-      message: `Success! ${saveUser.name} was successfully registered`,
-      id: saveUser._id,
-      name: saveUser.name,
-      email: saveUser.email,
-      thumbnail: saveUser.thumbnail,
-      thumbnail: saveUser.thumbnail,
-      session,
-      createdAt: saveUser.createdAt
-   };
+   console.log( '.. new user created: ', saveUser );
+   if( saveUser._id ){
+      return {
+         message: `Success! ${saveUser.name} was successfully registered`,
+         id: saveUser._id,
+         name: saveUser.name,
+         email: saveUser.email,
+         thumbnail: saveUser.thumbnail,
+         session,
+         createdAt: saveUser.createdAt
+      };
+   } else {
+      return {
+         error: `Sorry failed creating entry for ${dbUser.name}: `+JSON.stringify(saveUser)
+      };
+   }
 }
 
 // input: email, password

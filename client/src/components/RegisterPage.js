@@ -90,6 +90,7 @@ function RegisterPage(){
                                 id="password" type="password" class="form-control" />
                         </div>
                         <button onClick={registerUser} class="btn btn-primary submit" >Register</button>
+                        &nbsp; &nbsp; <a href="/login" class='font-weight-light text-muted'>Already Registered?</a>
                     </form>
                     </div>
                 </div>

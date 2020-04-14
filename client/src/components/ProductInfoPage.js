@@ -6,10 +6,11 @@ import { useGlobalStore } from "./GlobalStore";
 import API from "./API";
 
 
-function ProductInfoPage( props ){
+function ProductInfoPage(){
+    console.log( `[ProductInfoPage] function called for re-render check.`)
     const { id } = useParams();
     const [ showProduct, setShowProduct ]= useState([]);
-    const [ globalData, dispatch ] = useGlobalStore();
+    const [ , dispatch ] = useGlobalStore();
 
     // load only ONCE at component load
     useEffect( function(){
@@ -20,6 +21,7 @@ function ProductInfoPage( props ){
         const apiProduct = await API.get(`/api/product/${id}`);
 
         if( apiProduct.error ){
+            console.log( `/api/product/${id} error: ${apiProduct.error}` );
             dispatch( { do: 'setMessage', type: 'danger', message: apiProduct.error } );
             return;
         }        
@@ -27,8 +29,10 @@ function ProductInfoPage( props ){
     }
 
     function addToCart(){
+        console.log( `[addToCart] called...` );
+        // the component is re-rendered multiple times, so it triggers this dispatch twice
         dispatch({ 
-            type: 'addToCart', id, num: 1, ...showProduct });
+            do: 'addToCart', id, num: 1, ...showProduct });
     }
 
     return (
