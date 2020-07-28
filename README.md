@@ -1,6 +1,18 @@
 # Everest App
+## Install ##
+1. npm install
+2. create .env file (first 2 lines are needed, others depend on your oAuth needs):
+--
+MONGODB_URI=mongodb://localhost:27017/everest
+SESSION_SECRET=s3cr3tl00t
+GOOGLE_KEY=...
+GOOGLE_SECRET=...
+TWITTER_KEY=...
+TWITTER_SECRET=...
+--
+
 *NOTE* You need to go to the developer pages on the sites you want to offer oAuth for, and configure an app to allow the login.
- 
+
 For local debugging you should use an oAuth provider that allows you to set the
 callback to http://localhost:8080/oauth/(provider)/callback.
 
