@@ -1,3 +1,11 @@
+// Compact oAuth library
+// ---------------------
+// Written By: Filipe Laborde // fil@rezox.com
+// License:    MIT - use as you wish
+//
+// Usage: include server-side code for oAuth
+// require('./oAuth')(app);
+
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
@@ -7,8 +15,6 @@ const { Strategy: FacebookStrategy } = require('passport-facebook');
 const { Strategy: GithubStrategy} = require('passport-github');
 const { OAuth2Strategy: LinkedInStrategy } = require('passport-linkedin-oauth2');
 
-// include server-side code for oAuth
-// require('./oAuth')(app);
 function oAuth( app, API_URL, providers, createOAuthSession ){
    console.log( '[oAuth] adding oAuth related endpoints & middleware' );
 

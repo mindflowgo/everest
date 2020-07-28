@@ -15,8 +15,8 @@ import Footer from './components/Footer';
 
 function App() {
   return (
+    <GlobalStore> {/* provides common elements across components */}
     <Router>
-      <GlobalStore> {/* provides common elements across components */}
       <div className="App">
           <NavBar />
           <div class="container">
@@ -32,8 +32,8 @@ function App() {
 
           <Footer />
       </div>
-      </GlobalStore>
     </Router>
+    </GlobalStore>
   );
 }
 

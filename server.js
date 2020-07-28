@@ -2,8 +2,7 @@ require('dotenv').config(); // --> process.env
 const express = require( 'express' );
 const fs = require('fs');
 const uuid = require( 'uuid' );
-
-const orm = require( './db/orm.mongoose' );
+const orm = require('./app/db/orm.mongoose.js');
 
 const PORT = process.env.PORT || 8080;
 const API_URL = process.env.NODE_ENV === 'production'
@@ -56,21 +55,21 @@ async function createOAuthSession( userData ){
    return authUserData;
 }
 // oAuth - list providers we'll accept .env info for
-require('./oAuth')(app, API_URL, ['twitter','google','facebook','github','linkedin'], createOAuthSession);
+require('./app/oAuth')(app, API_URL, ['twitter','google','facebook','github','linkedin'], createOAuthSession);
 
 
 
 // ENDPOINTS      /---> next()
 app.get('/api/product/list', needSession, async function( req,res ){
    console.log( '[product/list] ' );
-   const products = JSON.parse( fs.readFileSync( 'db/products.json' ) );
+   const products = JSON.parse( fs.readFileSync( 'app/db/products.json' ) );
 
    res.send( products );
 });
 
 app.get('/api/product/:id', needSession, async function( req,res ){
    // parse the :id and serve ONE product.
-   const products = JSON.parse( fs.readFileSync( 'db/products.json' ) );
+   const products = JSON.parse( fs.readFileSync( 'app/db/products.json' ) );
    const id = req.params.id;
 
    const product = products.filter( product=>product.id===id )[0];
@@ -112,5 +111,7 @@ app.get('/*', function (req, res) {
 });
 
 app.listen( PORT, function(){
-   console.log( `[everest server] RUNNING, http://localhost:${PORT}` );
+   console.log( `[everest server] RUNNING, http://localhost:${PORT}
+   Note: the oAuth will probably not work, as it's been configured for this link: 
+   https://everestapp.herokuapp.com` );
 });

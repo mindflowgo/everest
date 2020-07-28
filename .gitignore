@@ -6,6 +6,7 @@
 .pnp.js
 /client/node_modules
 /client/package-lock.json
+package-lock.json
 
 # testing
 /coverage
@@ -19,6 +20,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env
 .zip
 .tar
 .tgz

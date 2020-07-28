@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require ( 'bcrypt' );
+const mongoose = require( 'mongoose' );
+const bcrypt = require( 'bcrypt' );
 
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false});
 
@@ -150,8 +150,9 @@ async function registerUser( userData, session='' ){
       session
    };
 
-   const dbUser = new db.users( saveData );
-   const saveUser = await dbUser.save();
+   const saveUser = await db.users.create( saveData );
+   // const dbUser = new db.users( saveData );
+   // const saveUser = await dbUser.save();
    console.log( '.. new user created: ', saveUser );
    if( saveUser._id ){
       return {
@@ -165,7 +166,7 @@ async function registerUser( userData, session='' ){
       };
    } else {
       return {
-         error: `Sorry failed creating entry for ${dbUser.name}: `+JSON.stringify(saveUser)
+         error: `Sorry failed creating entry for ${saveUser.name}: `+JSON.stringify(saveUser)
       };
    }
 }
@@ -177,7 +178,7 @@ async function loginUser( email, password, session ) {
       return { error: 'System error (session-not-given)' };
    }
 
-   const userData = await db.users.findOne({ email: email });
+   const userData = await db.users.findOne({ email: email }, '-createdAt -updatedAt');
    console.log( `[loadUser] email='${email}' userData:`, userData );
    if( !userData ) {
       return { error: 'Invalid password' };
@@ -194,8 +195,6 @@ async function loginUser( email, password, session ) {
 
    // update the session
    // remove entries before we do teh update
-   delete userData.createdAt;
-   delete userData.updatedAt;
    const dbResult = await db.users.findOneAndUpdate(
       { _id: userData._id},
       userData );
