@@ -1,7 +1,8 @@
 # Everest App
 ## Install ##
-1. npm install
-2. create .env file (first 2 lines are needed, others depend on your oAuth needs):
+1. git clone repo
+2. npm install
+2. modify .env file (if needed; first 2 lines are needed, others you can add KEY/SECRET entries depend on your oAuth needs):
 ```
 MONGODB_URI=mongodb://localhost:27017/everest
 SESSION_SECRET=s3cr3tl00t
@@ -10,7 +11,17 @@ GOOGLE_SECRET=...
 TWITTER_KEY=...
 TWITTER_SECRET=...
 ```
-3. run it - node server.js
+3. npm start
+
+## Developer Notes ##
+If you want to adjust the React front-end, you need to install a few developer dependencies
+1. npm install -g concurrently nodemon
+2. npm run install   (this will install all the react dependencies)
+
+finall:
+npm run start:dev
+
+This will run the server under nodemon, so any changes on it will trigger a reload, and likewise, will run the front-end under the normal React dev environment to allow reloading.
 
 
 *NOTE* You need to go to the developer pages on the sites you want to offer oAuth for, and configure an app to allow the login.
