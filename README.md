@@ -2,14 +2,14 @@
 ## Install ##
 1. npm install
 2. create .env file (first 2 lines are needed, others depend on your oAuth needs):
-`
+```
 MONGODB_URI=mongodb://localhost:27017/everest
 SESSION_SECRET=s3cr3tl00t
 GOOGLE_KEY=...
 GOOGLE_SECRET=...
 TWITTER_KEY=...
 TWITTER_SECRET=...
-`
+```
 3. run it - node server.js
 
 
