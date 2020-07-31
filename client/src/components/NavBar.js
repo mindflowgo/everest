@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useGlobalStore } from "./GlobalStore";
 import { Redirect } from 'react-router-dom';
 import API from "./API";
@@ -74,9 +74,9 @@ function NavBar() {
     <>
     { invalidSession ? <Redirect to='/login' /> : '' }
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <Link to="/" className="navbar-brand">
+      <NavLink to="/" className="navbar-brand">
           <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="" style={style.logo} />
-      </Link>
+      </NavLink>
       {/* <a class="navbar-brand" href="#" onClick={ function(){ props.changePage('AboutPage')} }>Pupster</a> */}
       <button onClick={() => setShowMenu(!showMenu)} class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -85,39 +85,29 @@ function NavBar() {
       <div className={`collapse navbar-collapse `+(showMenu ? 'show' : '')} id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li className="nav-item">
-            <Link to="/productlist" className={location.pathname === "/productlist" ? "nav-link active" : "nav-link"}>
-              Product List
-            </Link>
+            <NavLink to="/productlist" className="nav-link" activeClassName="active">Product List</NavLink>
           </li>          
           <li className="nav-item">
-            <Link to="/productadd" className={location.pathname === "/productadd" ? "nav-link active" : "nav-link"}>
-              Product Add
-            </Link>
+            <NavLink to="/productadd" className="nav-link" activeClassName="active">Product Add</NavLink>
           </li> 
           <li className="nav-item">
-            <Link to="/settings" className={location.pathname === "/settings" ? "nav-link active" : "nav-link"}>
-              Settings
-            </Link>
+            <NavLink to="/settings" className="nav-link" activeClassName="active">Settings</NavLink>
           </li>
           <li className="nav-item">
-            <Link to="/cart" className={location.pathname === "/cart" ? "nav-link active" : "nav-link"}>
+            <NavLink to="/cart" className="nav-link" activeClassName="active">
               { cartTotalQuantity 
                 ? <span class="badge badge-pill badge-success"><i class="fas fa-shopping-cart"></i> {cartTotalQuantity}</span>
                 : ''
               }
-            </Link>
+            </NavLink>
           </li>          
           { localStorage.session ? 
             <li className="nav-item">
-              <Link to="/logout" className="nav-link">
-                Logout
-              </Link>
+              <NavLink to="/logout" className="nav-link">Logout</NavLink>
             </li> 
             :
             <li className="nav-item">
-              <Link to="/login" className="nav-link">
-                Login
-              </Link>
+              <NavLink to="/login" className="nav-link">Login</NavLink>
             </li>
           }       
         </ul>
