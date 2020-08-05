@@ -12,6 +12,7 @@ function NavBar() {
   const [ showMenu, setShowMenu ] = useState( false );
   const [ invalidSession, setInvalidSession ] = useState( false );
   const [ globalData, dispatch ] = useGlobalStore();
+  console.log( `[Navbar] `, globalData )
 
   const location = useLocation();
   const style = {
@@ -33,14 +34,14 @@ function NavBar() {
         // if server status was not good before, then we probably have a message of this
         // so clear it.
         if( globalData.serverStatus !== 'running')
-          dispatch( { do: 'clearMessage' } );
+          dispatch( [{ do: 'clearMessage' }] );
 
       } else {
-        dispatch( { do: 'setMessage', type: 'danger', message: apiServerStatus.error } );
+        dispatch( [{ do: 'setMessage', type: 'danger', message: apiServerStatus.error }] );
         console.log( `[App] Crap server is not running, show an error...` );
       }
     } catch( e ){
-      dispatch( { do: 'setMessage', type: 'danger', message: `Server down...` } );
+      dispatch( [{ do: 'setMessage', type: 'danger', message: `Server down...` }] );
     }
   }
 
@@ -48,7 +49,7 @@ function NavBar() {
   useEffect( function(){
     checkSession();
 
-    // and do a periodic check on the server, indicating a problem if server is down
+    // // and do a periodic check on the server, indicating a problem if server is down
     setInterval( checkServer, 15000 );
     checkServer();
   }, [] );

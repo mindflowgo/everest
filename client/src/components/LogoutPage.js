@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
+import { useGlobalStore } from "./GlobalStore";
 import { Redirect } from 'react-router-dom';
 import API from "./API";
-import { useGlobalStore } from "./GlobalStore";
 
 function LogoutPage(){
     const [ globalData, dispatch ] = useGlobalStore();
@@ -21,17 +21,17 @@ function LogoutPage(){
 
         // quit if error
         if( apiResult.error ){
-            dispatch( { do: 'setMessage', type: 'danger', message: apiResult.error } );
+            dispatch( [{ do: 'setMessage', type: 'danger', message: apiResult.error }] );
             return;
         }
 
-        dispatch( { do: 'setMessage', type: 'success', message: 'Logged out...' } );
+        dispatch( [{ do: 'setMessage', type: 'success', message: 'Logged out...' }] );
 
         // save the active session
         localStorage.session = '';
 
         setTimeout( function(){ 
-                dispatch( { do: 'loginState', loggedIn: false })
+                dispatch( [{ do: 'loginState', loggedIn: false }] )
             }, 3000 );
     }
     
