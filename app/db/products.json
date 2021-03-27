@@ -6,7 +6,7 @@
     "rating": 4,
     "reviews": [ 
          { "name": "Fil", "rating": 4, "review": "Was awesome" },
-         { "name": "Anant", "rating": 2, "review": "Broke after second use, returned." }
+         { "name": "Jane", "rating": 2, "review": "Broke after second use, returned." }
       ] 
  },
  {  "id": "1203-2344",
@@ -16,9 +16,9 @@
     "price": 199.98,
     "rating": 3,
     "reviews": [ 
-      { "name": "Przemek", "rating": 4, "review": "Baby seemed happy" },
-      { "name": "Sahar", "rating": 5, "review": "My kid loves it." },
-      { "name": "Norma", "rating": 2, "review": "Okay but expensive" }
+      { "name": "John", "rating": 4, "review": "Baby seemed happy" },
+      { "name": "Mo", "rating": 5, "review": "My kid loves it." },
+      { "name": "Kartik", "rating": 2, "review": "Okay but expensive" }
    ] 
  },    
  {  "id": "1203-2345",

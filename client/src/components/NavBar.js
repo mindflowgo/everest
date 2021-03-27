@@ -1,130 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from "react-router-dom";
-import { useGlobalStore } from "./GlobalStore";
-import { Redirect } from 'react-router-dom';
-import API from "./API";
+import React, { useState, useEffect } from 'react'
+import { Redirect, NavLink, useLocation } from 'react-router-dom'
+import { useStoreContext } from '../utils/GlobalStore'
+import fetchJSON from '../utils/API'
 
-let showTimeout,serverInterval;
-let prevLocation;
+let timeout
 
-/* activePage  | changePage-call-back */
 function NavBar() {
-  const [ showMenu, setShowMenu ] = useState( false );
-  const [ invalidSession, setInvalidSession ] = useState( false );
-  const [ globalData, dispatch ] = useGlobalStore();
-  console.log( `[Navbar] `, globalData )
+  const [{ authOk, name, thumbnail, cart }, dispatch ]= useStoreContext()
+  const [ showMenu, setShowMenu ] = useState( false )
+  const [ cartNum, setCartNum ]= useState( 0 )
+  const location = useLocation()
 
-  const location = useLocation();
-  const style = {
-      logo: { width: '64px', height: '64px' }
-  }
-
-  function checkSession(){
-    // force redirection if no session & yet not login/reg pages
-    const isSessionExisting = localStorage.session && localStorage.session.length===36;
-    const isUrlNotRequiringLogin = location.pathname==='/login' || location.pathname==='/register';
-    console.log( `[Navbar] isSessionExisting(${isSessionExisting}) isUrlNotRequiringLogin(${isUrlNotRequiringLogin}): ${!isSessionExisting && !isUrlNotRequiringLogin}` );
-    setInvalidSession( !isSessionExisting && !isUrlNotRequiringLogin );
-  }
-
-  async function checkServer(){
-    try {
-      const apiServerStatus = await API.get(`/server-status`)
-      if( apiServerStatus.status==='running' ){
-        // if server status was not good before, then we probably have a message of this
-        // so clear it.
-        if( globalData.serverStatus !== 'running')
-          dispatch( [{ do: 'clearMessage' }] );
-
-      } else {
-        dispatch( [{ do: 'setMessage', type: 'danger', message: apiServerStatus.error }] );
-        console.log( `[App] Crap server is not running, show an error...` );
-      }
-    } catch( e ){
-      dispatch( [{ do: 'setMessage', type: 'danger', message: `Server down...` }] );
+  async function loadUserSession(){
+    const { status, userData, message }= await fetchJSON( `/api/users/session` )
+    console.log( `[NavBar] attempted to reload session, result(${status}) message(${message})` )
+    if( !status ){
+       // clear any session
+       localStorage.session = ''
+       dispatch({ type: 'ALERT_MESSAGE', message })
+       return
     }
+    dispatch({ type: 'USER_LOGIN', data: userData })
   }
-
 
   useEffect( function(){
-    checkSession();
+    if( showMenu ){
+        if( timeout ) {
+          clearTimeout( timeout )
+        }
+        timeout = setTimeout( function(){
+          setShowMenu( false );
+        }, 2000 )
+    }
+  }, [ showMenu ])
 
-    // // and do a periodic check on the server, indicating a problem if server is down
-    setInterval( checkServer, 15000 );
-    checkServer();
-  }, [] );
+  // location changed so hide menu
+  useEffect( function(){
+    if( timeout ) {
+        clearTimeout( timeout )
+    }
+    setShowMenu( false )
+  }, [ location ])
 
-  if( showMenu ){
-    // hide the nav after 10s
-    clearTimeout( showTimeout );
-    showTimeout = setTimeout( function(){ setShowMenu( false ); }, 2000 );
-  }
+  useEffect( function(){
+    // changes in the cart, then re-calculate the total
+    console.log( `.. updating cart num: `, cart.reduce( (total,item) => total+item.num, 0 ) )
+    setCartNum( cart.reduce( (total,item) => total+item.num, 0 ) )
+  }, [ cart ])
 
-  // if we change locations, hide menu immediately
-  if( prevLocation!==location.pathname ){
-    console.log( `**** > location changed, hiding menu`)
-    clearTimeout( showTimeout );
-    showTimeout = setTimeout( function(){ setShowMenu( false ); }, 100 );
-    // setShowMenu( false );
-    prevLocation = location.pathname;
-  }
+  useEffect( function(){
+    // on load let's get the session if it's blank (Ex browser reload)
+    if( localStorage.session.length===36 && !authOk ){
+      loadUserSession()
+    }
+  }, [] )
 
-  const cartTotalQuantity =( globalData && globalData.cart ? globalData.cart.reduce( (total,item) => total+item.num, 0 ) : 0 );
+   return (
+      <>
+         { localStorage.session.length!==36 && !authOk ? <Redirect to='/login' /> :
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+               <NavLink to="/" className="navbar-brand">
+                  <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="mountain icon" width="64" height="64" />
+               </NavLink>
+               <button onClick={() => setShowMenu(!showMenu)} class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+                  <span class="navbar-toggler-icon"></span>
+               </button>
 
-  return ( 
-    <>
-    { invalidSession ? <Redirect to='/login' /> : '' }
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <NavLink to="/" className="navbar-brand">
-          <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="" style={style.logo} />
-      </NavLink>
-      {/* <a class="navbar-brand" href="#" onClick={ function(){ props.changePage('AboutPage')} }>Pupster</a> */}
-      <button onClick={() => setShowMenu(!showMenu)} class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div className={`collapse navbar-collapse `+(showMenu ? 'show' : '')} id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li className="nav-item">
-            <NavLink to="/productlist" className="nav-link" activeClassName="active">Product List</NavLink>
-          </li>          
-          <li className="nav-item">
-            <NavLink to="/productadd" className="nav-link" activeClassName="active">Product Add</NavLink>
-          </li> 
-          <li className="nav-item">
-            <NavLink to="/settings" className="nav-link" activeClassName="active">Settings</NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/cart" className="nav-link" activeClassName="active">
-              { cartTotalQuantity 
-                ? <span class="badge badge-pill badge-success"><i class="fas fa-shopping-cart"></i> {cartTotalQuantity}</span>
-                : ''
-              }
-            </NavLink>
-          </li>          
-          { localStorage.session ? 
-            <li className="nav-item">
-              <NavLink to="/logout" className="nav-link">Logout</NavLink>
-            </li> 
-            :
-            <li className="nav-item">
-              <NavLink to="/login" className="nav-link">Login</NavLink>
-            </li>
-          }       
-        </ul>
-      </div>
-    </nav>
-
-    <div class='container'>
-      {/* show user session info */}
-      { globalData.name ? <div class='d-block'>{ globalData && globalData.thumbnail ? <img src={globalData.thumbnail} id='navThumbnail' /> : '' } Welcome {globalData.name}</div> : '' }
-      {/* show a global message bar below the nav */}
-      <div className={ globalData.messageType ? `alert alert-${globalData.messageType}` : 'd-hide' } role="alert">
-          {globalData.message}
-      </div>
-    </div>      
-    </>
-  );
+               <div className={'collapse navbar-collapse '+(showMenu ? 'show' : '')} id="navbar">
+                  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                     <li className="nav-item">
+                        <NavLink to="/products" className="nav-link" activeClassName="active">Product List</NavLink>
+                     </li>
+                     <li className="nav-item">
+                        <NavLink to="/products/add" className="nav-link" activeClassName="active">Product Add</NavLink>
+                     </li>
+                     <li className="nav-item">
+                        <NavLink to="/settings" className="nav-link" activeClassName="active">Settings</NavLink>
+                     </li>
+                     <li className="nav-item">
+                        <NavLink to="/cart" className="nav-link" activeClassName="active">
+                          <i class="fas fa-shopping-cart"></i> Cart { cartNum>0 && <span class="badge rounded-pill bg-warning text-dark">{cartNum}</span> }
+                        </NavLink>
+                     </li>
+                     <li className="nav-item">
+                        <NavLink to="/logout" className="nav-link">Logout</NavLink>
+                      </li> 
+                  </ul>
+                  { thumbnail && <div class="d-flex"><div class="mx-3"><img src={thumbnail} id='navThumbnail' alt="user thumbnail" /></div></div> }
+                  { !thumbnail && name && <div class="d-flex"><div class="mx-3">Welcome back <u>{name}</u></div></div> }
+               </div>
+            </nav>
+         }
+      </>
+   )
 }
 
-export default NavBar;
+export default NavBar

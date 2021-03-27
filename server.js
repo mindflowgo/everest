@@ -1,117 +1,49 @@
-require('dotenv').config(); // --> process.env
-const express = require( 'express' );
-const fs = require('fs');
-const uuid = require( 'uuid' );
-const orm = require('./app/db/orm.mongoose.js');
+require( 'dotenv' ).config() // looks for .env ; process.env gets it's values
 
-const PORT = process.env.PORT || 8080;
+const path = require('path')
+const express = require('express')
+const apiRouter = require('./app/router')
+const app = express()
+const orm = require('./app/db/orm.mongoose')
+
+const PORT = process.env.PORT || 8080
 const API_URL = process.env.NODE_ENV === 'production'
-   ? 'https://everestapp.herokuapp.com' : 'http://localhost:8080';
+   ? 'https://everestapp.herokuapp.com' : `http://localhost:${PORT}`
 
-const app = express();
-// const upload = require('multer')({ dest: 'public/uploads/' });
-
-// PORT is only set by Heroku, else we know it's local
-if( !process.env.PORT && !fs.existsSync('.env') ){
-   console.log( '*ERROR* You need a .env file (with MONGODB_URI, SESSION_SECRET, GOOGLE_KEY/SECRET,...)' );
-   process.exit();
+if( !process.env.MONGODB_URI || !process.env.SESSION_SECRET ){
+   console.log( '*ERROR* You need a .env file (with MONGODB_URI,SESSION_SECRET, and other oAuth entries...)' )
+   process.exit()
 }
 
-// to server any static files in client/build
-// note we do a /* at end for react URL re-writing
-app.use( express.static('client/build/') );
-// for post requests
-app.use( express.urlencoded({ extended: false }) );
-app.use( express.json() );
+// for parsing incoming POST data
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-// session checking middleware
-async function needSession(req, res, next){
-   console.log( `[middleware] session url(${req.url}) session(${req.headers.session || ''}) ` );
-
-   // check session set, and it's valid
-   if( !req.headers.session ||
-        req.headers.session.length!==36 ||
-        !(await orm.checkSession( req.headers.session )) ){
-
-      console.log( '[middleware:session] invalid session, indicating redirect' );
-      res.status(403).send( { error: 'Requires valid session. Please login again.' } );
-      return;
-   }
-
-   // session was good, let's continue endpoint processing...
-   next();
+if (process.env.NODE_ENV === 'production') {
+   // for serving REACT production-build content
+   console.log( '> production: static from client/build' )
+   app.use( express.static(path.join('client','build')) )
+} else {
+   // for serving all the normal html
+   app.use( express.static('public') )
 }
 
+// oAuth
 
-// OAUTH Authentication
-async function createOAuthSession( userData ){
-   console.log( `[createOAuthSession] called for ${userData.name}` );
+// for routes
+apiRouter( app, API_URL )
 
-   // register user in system (if they aren't there, and get the associated session)
-   const session = uuid.v4();
-   const authUserData = await orm.registerUser( userData, session );
-
-   // returns the logged-in user info to javascript
-   return authUserData;
+// **OPTIONAL** If your REACT routing allows non-standard paths (ex. fake paths for React-Router)
+// THEN you need to enable this for server-side serving to work
+if (process.env.NODE_ENV === 'production') {
+   app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, './client/build/index.html'))
+   })
 }
-// oAuth - list providers we'll accept .env info for
-require('./app/oAuth')(app, API_URL, ['twitter','google','facebook','github','linkedin'], createOAuthSession);
 
+// seed database
+orm.seedDatabase()
 
-
-// ENDPOINTS      /---> next()
-app.get('/api/product/list', needSession, async function( req,res ){
-   console.log( '[product/list] ' );
-   const products = JSON.parse( fs.readFileSync( 'app/db/products.json' ) );
-
-   res.send( products );
-});
-
-app.get('/api/product/:id', needSession, async function( req,res ){
-   // parse the :id and serve ONE product.
-   const products = JSON.parse( fs.readFileSync( 'app/db/products.json' ) );
-   const id = req.params.id;
-
-   const product = products.filter( product=>product.id===id )[0];
-
-   res.send( product );
-});
-
-app.post('/api/user/register', async function( req,res ){
-   const userData = req.body;
-   console.log( '[POST: /api/user/register] userData: ', userData );
-   const registerResult = await orm.registerUser( userData );
-   res.send( registerResult );
-});
-
-app.post('/api/user/login', async function( req,res ){
-   const userData = req.body;
-   console.log( '[POST: /api/user/login] userData: ', userData );
-   const session = uuid.v4();
-   const loginResult = await orm.loginUser( userData.email, userData.password, session );
-   loginResult.rememberMe = req.body.rememberMe;
-   res.send( loginResult );
-});
-
-app.post('/api/user/logout', needSession, async function( req,res ){
-   console.log( '[POST: /api/user/logout] userData: ' );
-   const logoutResult = await orm.logoutUser( req.headers.session );
-   res.send( logoutResult );
-});
-
-app.get('/server-status', function(req, res){
-   res.send({ status: 'running', time: Date.now() });
-});
-
-// to allow the react url rewriting (in production), we must pass all
-// wildcard unknown URLs to react (ex. /productlist)
-app.get('/*', function (req, res) {
-   console.log( `[/*] (${req.protocol}//${req.get('host')}/${req.originalUrl} -- sending file: ${__dirname}/client/build/index.html` );
-   res.sendFile(`${__dirname}/client/build/index.html`);
-});
-
-app.listen( PORT, function(){
-   console.log( `[everest server] RUNNING, http://localhost:${PORT}
-   Note: the oAuth will probably not work, as it's been configured for this link: 
-   https://everestapp.herokuapp.com` );
-});
+app.listen(PORT, function(){
+   console.log( `Serving app on: http://localhost:${PORT}` )
+})

@@ -1,18 +1,21 @@
 {
   "name": "everest",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sample shopping cart app",
   "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
   "scripts": {
     "start": "node server.js",
     "start:dev": "concurrently \"nodemon --ignore 'client/*'\" \"npm run client\"",
     "client": "cd client && npm run start",
     "install": "cd client && npm install",
     "build": "cd client && npm run build",
-    "heroku-postbuild": "npm run build"  
+    "heroku-postbuild": "npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Filipe Laborde",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^4.0.1",
     "cors": "^2.8.5",
@@ -26,6 +29,10 @@
     "passport-google-oauth": "^2.0.0",
     "passport-linkedin-oauth2": "^2.0.0",
     "passport-twitter": "^1.0.4",
-    "uuid": "^7.0.3"
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "concurrently": "^6.0.0",
+    "nodemon": "^2.0.7"
   }
 }

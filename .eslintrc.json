@@ -6,7 +6,7 @@
       "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 9,
     "sourceType": "module",
     "ecmaFeatures": {
         "jsx": true
@@ -28,7 +28,7 @@
       "no-trailing-spaces": "error",
       "default-case": "error",
       "no-fallthrough": "error",
-      "no-unused-vars": "error",
+      "no-unused-vars": "off",
       "no-use-before-define": "error",
       "no-redeclare": "error",
       "camelcase": "error",
@@ -42,9 +42,7 @@
           "single"
       ],
       "semi": [
-          "error",
-          "always"
+          "off"
       ]
   }
 }
-
