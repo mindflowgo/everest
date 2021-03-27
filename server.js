@@ -8,7 +8,7 @@ const orm = require('./app/db/orm.mongoose')
 
 const PORT = process.env.PORT || 8080
 const API_URL = process.env.NODE_ENV === 'production'
-   ? 'https://everestapp.herokuapp.com' : `http://localhost:${PORT}`
+   ? 'https://everestcart.herokuapp.com' : `http://localhost:${PORT}`
 
 if( !process.env.MONGODB_URI || !process.env.SESSION_SECRET ){
    console.log( '*ERROR* You need a .env file (with MONGODB_URI,SESSION_SECRET, and other oAuth entries...)' )
@@ -45,5 +45,5 @@ if (process.env.NODE_ENV === 'production') {
 orm.seedDatabase()
 
 app.listen(PORT, function(){
-   console.log( `Serving app on: http://localhost:${PORT}` )
+   console.log( `Serving app on: ${API_URL} (port: ${PORT})` )
 })
