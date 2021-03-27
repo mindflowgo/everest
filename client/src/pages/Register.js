@@ -52,7 +52,7 @@ function Register(){
 
    return (
       <>
-         { authOk ? <Redirect to='/tasks' /> : '' }
+         { authOk ? <Redirect to='/products' /> : '' }
          <form ref={refForm}>
             <div class="card mt-5">
                <div class="card-header">

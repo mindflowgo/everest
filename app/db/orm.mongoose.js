@@ -153,6 +153,7 @@ async function productSaveAndList( newProduct, ownerId ){
 async function seedDatabase(){
    const productsExist = await db.products.findOne({})
    if( productsExist && productsExist._id ){
+      console.log( ' .. not seeding, found a product already.' )
       return
    }
 
