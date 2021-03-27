@@ -45,6 +45,37 @@ async function userRegister( userData ){
    }
 }
 
+async function userOAuthRegister({ type, authId, name, thumbnail } ){
+   if( !authId ){
+      console.log( '[registerUser] invalid OAuth data! ', authId )
+      return { status: false, message: 'Invalid user data' }
+   }
+
+   let oAuthUser = await db.users.findOne({ type, authId })
+   console.log( `.. looking in userlist for type(${type}) and authId(${authId})` )
+   if( !oAuthUser || !oAuthUser._id ){
+      // new user so create!
+      console.log( '... SAVING oAuth user to database ')
+      oAuthUser = await db.users.create({ type, authId, name, thumbnail })
+      if( !oAuthUser._id ){
+         return { status: false, message: `Sorry failed creating entry for ${name}: ` }
+      }
+   }
+   // console.log( ' .. user: ' + JSON.stringify( oAuthUser ) )
+
+   return {
+      status: true,
+      message: `Success! ${name} was successfully logged-in`,
+      userData: {
+         id: oAuthUser._id,
+         name: oAuthUser.name,
+         email: '',
+         thumbnail: oAuthUser.thumbnail,
+         type: oAuthUser.type
+      }
+   }
+}
+
 async function userLogin( email, password ) {
    const userData = await db.users.findOne({ email: email }, '-createdAt -updatedAt')
    if( !userData || !userData._id ) {
@@ -65,7 +96,8 @@ async function userLogin( email, password ) {
          id: userData._id,
          name: userData.name,
          email: userData.email,
-         thumbnail: userData.thumbnail
+         thumbnail: userData.thumbnail,
+         type: 'local'
       }
    }
 }
@@ -125,7 +157,7 @@ async function seedDatabase(){
    }
 
    const fs = require('fs')
-   const products = JSON.parse( fs.readFileSync( './app/db/products.json' ) )
+   const products = JSON.parse( fs.readFileSync( './app/db/seed.json' ) )
    products.forEach( async productData=>{
       const result = await db.products.create( productData )
       if( !result._id ){
@@ -139,8 +171,9 @@ async function seedDatabase(){
 module.exports = {
    userRegister,
    userLogin,
+   userOAuthRegister,
    userSession,
    productList,
    productSaveAndList,
    seedDatabase
-};
+}

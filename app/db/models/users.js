@@ -6,8 +6,8 @@ let users = new Schema ({
    email:  { type: String, trim: true,
       match: [/.+@.+\..+/, 'Please enter a valid e-mail address'] },
    thumbnail: { type: String, trim: true },
-   type: { type: String, default: 'local' },
-   authId: { type: String, default: '' },
+   type: { type: String, default: 'local' }, // used by OAuth
+   authId: { type: String, default: '' }, // used by OAuth
    password:  { type: String, trim: true },
    // favourites: [{
    //    thumbId: mongoose.Types.ObjectId,

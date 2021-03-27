@@ -86,7 +86,7 @@ function NavBar() {
                         <NavLink to="/logout" className="nav-link">Logout</NavLink>
                       </li> 
                   </ul>
-                  { thumbnail && <div class="d-flex"><div class="mx-3"><img src={thumbnail} id='navThumbnail' alt="user thumbnail" /></div></div> }
+                  { thumbnail && <div class="d-flex"><div class="mx-3"><img src={thumbnail} id='navThumbnail' alt="user thumbnail" width="64" height="64" /></div></div> }
                   { !thumbnail && name && <div class="d-flex"><div class="mx-3">Welcome back <u>{name}</u></div></div> }
                </div>
             </nav>

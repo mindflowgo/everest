@@ -19,18 +19,15 @@ async function authRequired(req, res, next){
 
 function router( app, API_URL ){
    // OAUTH Authentication --------------------------------------------
-   async function createOAuthSession( userData ){
-      console.log( `[createOAuthSession] called for ${userData.name}` );
+   async function createOAuthSession({ type, authId, name, thumbnail } ){
+      console.log( `[createOAuthSession] called for ${name}` );
 
       // register user in system (if they aren't there, and get the associated session)
-      const authUserData = await orm.registerUser( userData );
+      const { status, message, userData } = await orm.userOAuthRegister({ type, authId, name, thumbnail })
 
-      const session = sessionManager.create( authUserData.id )
-
-      // res.send({ status, session, userData, message })
-
+      const session = sessionManager.create( userData.id )
       // returns the logged-in user info to javascript
-      return authUserData;
+      return { status, session, userData, message };
    }
    // oAuth - list providers we'll accept .env info for
    // generates the ENDpoints

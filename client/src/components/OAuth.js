@@ -13,14 +13,14 @@ function OAuth( props ){
             return;
          }
 
-         const loginData = JSON.parse(e.data)
-         console.log('<< from popup window, received:', loginData)
+         const oAuthData = JSON.parse(e.data)
+         console.log('<< from popup window, received:', oAuthData)
          if( oAuthWindow ) {
             oAuthWindow.close()
          }
-         // pass back the login info
-         if( props.loginComplete ) {
-            props.loginComplete(loginData)
+         // pass back the login info: { status, session, userData, message }
+         if( props.userLoginComplete ) {
+            props.userLoginComplete(oAuthData)
          }
       } , false)
    }, [] );

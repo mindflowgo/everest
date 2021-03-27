@@ -13,9 +13,15 @@ function Login(){
    const refForm = useRef()
 
    
-   function userLoginSave({ session, userData }){ 
+   function userLoginSave({ status, session, userData, message }){ 
       // login ok, saving session & saving userData
       console.log( `[userLoginSave] data:`, userData )
+      if( !status ){
+         // clear any session
+         localStorage.session = ''
+         dispatch({ type: 'ALERT_MESSAGE', message })
+         return
+      }      
       localStorage.session = session
       dispatch({ type: 'USER_LOGIN', data: userData })
    }
@@ -43,12 +49,6 @@ function Login(){
       }
 
       const { status, session, userData, message }= await fetchJSON( '/api/users/login', 'post', saveData )
-      if( !status ){
-         // clear any session
-         localStorage.session = ''
-         dispatch({ type: 'ALERT_MESSAGE', message })
-         return
-      }
 
       // remember email if user wanted
       if( inputRememberMe && inputRememberMe.current.checked ){
@@ -57,7 +57,7 @@ function Login(){
          localStorage.email = ''
       }
 
-      userLoginSave({ session, userData })
+      userLoginSave({ status, session, userData, message })
    }
 
    // at startup we initialize a few things
@@ -97,7 +97,7 @@ function Login(){
                   <label class='text-secondary' for='rememberMe'>Remember Me</label> &nbsp;
                   <Link to="/register" class="mx-3">Need to Register?</Link>
                </div>
-               <OAuth providers={['twitter','facebook','github','google','linkedin']} loginComplete={userLoginSave} />
+               <OAuth providers={['twitter','facebook','github','google','linkedin']} userLoginComplete={userLoginSave} />
             </div>
          </form>
       </>
