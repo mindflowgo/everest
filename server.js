@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
    })
 }
 
-// seed database
+// seed database (if needed)
 orm.seedDatabase()
 
 app.listen(PORT, function(){
