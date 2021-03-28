@@ -1,5 +1,4 @@
 import React, { createContext, useReducer, useContext } from 'react'
-import { useHistory } from "react-router-dom"
 
 // any variables we depend on for UI/flow we must pre-set
 const initialData = {
