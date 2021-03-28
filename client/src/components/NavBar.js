@@ -49,15 +49,15 @@ function NavBar() {
   }, [ cart ])
 
   useEffect( function(){
-    // on load let's get the session if it's blank (Ex browser reload)
-    if( localStorage.session.length===36 && !authOk ){
+    // on load let's get try to get the  session (if one exists)
+    if( localStorage.session && !authOk ){
       loadUserSession()
     }
   }, [] )
 
    return (
       <>
-         { localStorage.session.length!==36 && !authOk ? <Redirect to='/login' /> :
+         { !localStorage.session ? <Redirect to='/login' /> :
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                <NavLink to="/" className="navbar-brand">
                   <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="mountain icon" width="64" height="64" />
