@@ -12,7 +12,7 @@ function Products() {
     const { status, products: userProducts, message }= await fetchJSON( '/api/products' )
     console.log( `[productsLoad] status(${status}) message(${message}) userProducts:`, userProducts )
     if( !status ){
-      dispatch({ type: 'ALERT_MESSAGE', message })
+      dispatch({ type: 'USER_LOGOUT', message })
       return
     }
 

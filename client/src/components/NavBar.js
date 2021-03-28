@@ -16,8 +16,7 @@ function NavBar() {
     console.log( `[NavBar] attempted to reload session, result(${status}) message(${message})` )
     if( !status ){
        // clear any session
-       localStorage.session = ''
-       dispatch({ type: 'ALERT_MESSAGE', message })
+       dispatch({ type: 'USER_LOGOUT', message })
        return
     }
     dispatch({ type: 'USER_LOGIN', data: userData })
@@ -56,42 +55,42 @@ function NavBar() {
   }, [] )
 
    return (
-      <>
-         { !localStorage.session ? <Redirect to='/login' /> :
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-               <NavLink to="/" className="navbar-brand">
-                  <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="mountain icon" width="64" height="64" />
-               </NavLink>
-               <button onClick={() => setShowMenu(!showMenu)} class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-                  <span class="navbar-toggler-icon"></span>
-               </button>
+   <>
+      { localStorage.session && 
+         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <NavLink to="/" className="navbar-brand">
+               <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="mountain icon" width="64" height="64" />
+            </NavLink>
+            <button onClick={() => setShowMenu(!showMenu)} class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+               <span class="navbar-toggler-icon"></span>
+            </button>
 
-               <div className={'collapse navbar-collapse '+(showMenu ? 'show' : '')} id="navbar">
-                  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                     <li className="nav-item">
-                        <NavLink to="/products" className="nav-link" activeClassName="active">Product List</NavLink>
-                     </li>
-                     <li className="nav-item">
-                        <NavLink to="/products/add" className="nav-link" activeClassName="active">Product Add</NavLink>
-                     </li>
-                     <li className="nav-item">
-                        <NavLink to="/settings" className="nav-link" activeClassName="active">Settings</NavLink>
-                     </li>
-                     <li className="nav-item">
-                        <NavLink to="/cart" className="nav-link" activeClassName="active">
-                          <i class="fas fa-shopping-cart"></i> Cart { cartNum>0 && <span class="badge rounded-pill bg-warning text-dark">{cartNum}</span> }
-                        </NavLink>
-                     </li>
-                     <li className="nav-item">
-                        <NavLink to="/logout" className="nav-link">Logout</NavLink>
-                      </li> 
-                  </ul>
-                  { thumbnail && <div class="d-flex"><div class="mx-3"><img src={thumbnail} id='navThumbnail' alt="user thumbnail" width="64" height="64" /></div></div> }
-                  { !thumbnail && name && <div class="d-flex"><div class="mx-3">Welcome back <u>{name}</u></div></div> }
-               </div>
-            </nav>
-         }
-      </>
+            <div className={'collapse navbar-collapse '+(showMenu ? 'show' : '')} id="navbar">
+               <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li className="nav-item">
+                     <NavLink to="/products" className="nav-link" activeClassName="active">Product List</NavLink>
+                  </li>
+                  <li className="nav-item">
+                     <NavLink to="/products/add" className="nav-link" activeClassName="active">Product Add</NavLink>
+                  </li>
+                  <li className="nav-item">
+                     <NavLink to="/settings" className="nav-link" activeClassName="active">Settings</NavLink>
+                  </li>
+                  <li className="nav-item">
+                     <NavLink to="/cart" className="nav-link" activeClassName="active">
+                        <i class="fas fa-shopping-cart"></i> Cart { cartNum>0 && <span class="badge rounded-pill bg-warning text-dark">{cartNum}</span> }
+                     </NavLink>
+                  </li>
+                  <li className="nav-item">
+                     <NavLink to="/logout" className="nav-link">Logout</NavLink>
+                     </li> 
+               </ul>
+               { thumbnail && <div class="d-flex"><div class="mx-3"><img src={thumbnail} id='navThumbnail' alt="user thumbnail" width="64" height="64" /></div></div> }
+               { !thumbnail && name && <div class="d-flex"><div class="mx-3">Welcome back <u>{name}</u></div></div> }
+            </div>
+         </nav>
+      }
+   </>
    )
 }
 

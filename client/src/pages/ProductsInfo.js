@@ -13,7 +13,10 @@ function ProductsInfo(){
 
     async function productLoad( id ){
         const { status, products, message }= await fetchJSON( `/api/products/${id}` )
-        if( !status || products.length!==1 ){
+        if( !status ){
+            dispatch({ type: 'USER_LOGOUT', message })
+            return
+        } else if( products.length!==1 ){
             dispatch({ type: 'ALERT_MESSAGE', message })
             return
         }

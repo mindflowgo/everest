@@ -11,7 +11,6 @@ function Logout(){
         // call the api to logout (and clear session)
         const { message } = await fetchJSON( '/api/users/logout' )
         // logout
-        localStorage.session = ''
         dispatch({ type: 'USER_LOGOUT', message })
     }
     
