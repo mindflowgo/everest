@@ -12,9 +12,17 @@ function Messages() {
         setState({ ...state, [e.target.name]: e.target.value })
     }
 
+    useEffect(() => {
+        socket.on('message', ({ name, message }) => {
+            setChat([...chat, { name, message }])
+        })
+    })
+
     const onMessageSubmit = e => {
         e.preventDefault();
-        setState({ ...state, [e.target.message]: e.target.value })
+        const { name, message } = state
+        socket.emit('message', { name, message });
+        setState({ message: '', name })
     }
 
 
