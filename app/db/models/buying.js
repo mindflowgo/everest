@@ -15,7 +15,6 @@ const buyer = new Schema(
         size: {
             type: String
         }
-
     }
 );
 
