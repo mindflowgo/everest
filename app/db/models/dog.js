@@ -20,7 +20,7 @@ const dog = new Schema(
       },
       age: {
          type: Number,
-         trim: true,,
+         trim: true,
          required: "Please enter the age of the dog"
       },
       size: {
