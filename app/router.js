@@ -61,6 +61,16 @@ function router( app, API_URL ){
       res.send({ status, session, userData, message })
    })
 
+   app.put('/api/users/buyers/:id', async function(req, res) {
+      const userId = req.params.id
+      console.log( `[POST /api/users/buyer/${userId}] req.body:`, req.body )
+      const { status, userData, message }= await orm.createBuyer( userId, req.body )
+      if( !status ){
+         res.status(403).send({ status, message }); return
+      }
+      res.send({ status, userData, message })
+   })
+
    app.get('/api/users/session', authRequired, async function(req, res) {
       const { status, userData, message }= await orm.userSession( req.sessionData.userId )
       if( !status ){

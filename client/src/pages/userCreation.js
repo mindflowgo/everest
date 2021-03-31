@@ -7,15 +7,11 @@ function UserCreation(props) {
     const [userStatus, setUserStatus] = useState("")
 
     function setSeller() {
-        if (userStatus !== "Seller") {
-            setUserStatus("Seller")
-        }
+        setUserStatus("Seller")
     }
 
     function setBuyer() {
-        if (userStatus !== "Buyer") {
-            setUserStatus("Buyer")
-        }
+        setUserStatus("Buyer")
     }
     function buildBody() {
         switch (userStatus) {

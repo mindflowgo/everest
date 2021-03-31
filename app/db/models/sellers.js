@@ -1,13 +1,11 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const dog = new Schema(
+const seller = new Schema(
    {
-      sellerName: {
-         type: String,
-         trim: true,
-         required: "Enter the your name or shelter name"
-      },
+      user: {
+         type: Schema.Types.ObjectId,  
+     },
       dogName: {
          type: String,
          trim: true,
@@ -48,6 +46,6 @@ const dog = new Schema(
    }
 );
 
-module.exports = mongoose.model('dog', dog)
+module.exports = mongoose.model('sellers', seller)
 
 

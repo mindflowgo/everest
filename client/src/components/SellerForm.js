@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef } from 'react'
 
 function SellerForm() {
     return (
@@ -58,6 +58,7 @@ function SellerForm() {
                 <textarea class="form-control" placeholder="Leave a Description here" id="floatingTextarea2" style={{ height: "100px" }}></textarea>
                 <label for="floatingTextarea2">Description</label>
             </div>
+            <button className="btn btn-primary">Continue</button>
         </div>
     )
 }

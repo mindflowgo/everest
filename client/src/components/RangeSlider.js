@@ -9,17 +9,11 @@ const useStyles = makeStyles({
   },
 });
 
-function valuetext(value) {
-  return `${value}`;
-}
+
 
 export default function RangeSlider(props) {
-  const classes = useStyles();
-  const [value, setValue] = React.useState([0, 20]);
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  const classes = useStyles();
 
   return (
     <div className={classes.root}>
@@ -27,8 +21,8 @@ export default function RangeSlider(props) {
         {props.label}
       </Typography>
       <Slider
-        value={value}
-        onChange={handleChange}
+        value={props.sliderValue}
+        onChange={props.onChangeFunction}
         valueLabelDisplay="auto"
         aria-labelledby="range-slider"
         min={0}

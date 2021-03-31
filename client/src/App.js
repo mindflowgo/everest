@@ -1,4 +1,4 @@
-
+import React from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
 import { StoreProvider } from './utils/GlobalStore'
 
@@ -14,8 +14,8 @@ import Login from './pages/Login'
 import Logout from './pages/Logout'
 import Cart from './pages/Cart'
 import Settings from './pages/Settings'
-import UserCreation from './pages/UserCreation'
 import Messages from './pages/Messages'
+import UserCreation from './pages/UserCreation'
 
 function App() {
    return (
@@ -25,6 +25,7 @@ function App() {
                <AlertBar />
                <NavBar />
                <Route exact path={['/', '/products']} component={Products} />
+               <Route exact path={'/info'} component={UserCreation} />
                <Route exact path="/products/add" component={ProductsAdd} />
                <Route exact path="/products/info/:id" component={ProductsInfo} />
                <Route exact path="/cart" component={Cart} />
