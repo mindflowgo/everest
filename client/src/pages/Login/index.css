@@ -1,10 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;700&display=swap');
 
-body {
-  background-color: #39ac73;
-}
-
 h2 {
   font-family: 'Raleway';  
   font-weight: 700;

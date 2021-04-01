@@ -5,7 +5,7 @@ import fetchJSON from "../../utils/API";
 import OAuth from "../../components/OAuth";
 import NavBar from "../../components/NavBar";
 import Footer from "../../components/Footer/index";
-import "./Login.css";
+import "./index.css";
 import Logo from "../../components/Logo/Logo";
 
 function Login() {
@@ -74,6 +74,7 @@ function Login() {
   useEffect(function () {
     inputEmail.current.value = localStorage.email || "";
     inputRememberMe.current.checked = true;
+    document.body.style.backgroundColor = "#39ac73"; // Set the style
   }, []);
 
   return (
