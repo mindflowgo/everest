@@ -72,7 +72,7 @@ function OAuth( props ){
             {props.providers.map( provider=>
 
                <button onClick={()=>openOAuth(provider)} class='btn btn-outline-secondary' style={{marginRight:'10px'}}>
-                  <i className={`fab ${icons[provider]} fa-3x`}></i>
+                  <i className={`fab ${icons[provider]} fa-2x`}></i>
                </button>
             )}
          </div>

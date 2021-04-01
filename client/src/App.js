@@ -3,14 +3,14 @@ import { BrowserRouter, Route } from 'react-router-dom'
 import { StoreProvider } from './utils/GlobalStore'
 
 import NavBar from './components/NavBar'
-import Footer from './components/Footer'
+import Footer from './components/Footer/index'
 import AlertBar from './components/AlertBar'
 // pages
 import Products from './pages/Products'
 import ProductsInfo from './pages/ProductsInfo'
 import ProductsAdd from './pages/ProductsAdd'
 import Register from './pages/Register'
-import Login from './pages/Login'
+import Login from './pages/Login/Login'
 import Logout from './pages/Logout'
 import Cart from './pages/Cart'
 import Settings from './pages/Settings'
@@ -21,7 +21,7 @@ function App() {
    return (
       <StoreProvider>
          <BrowserRouter>
-            <div class="container">
+            <div className="container">
                <AlertBar />
                <NavBar />
                <Route exact path={['/', '/products']} component={Products} />
@@ -34,10 +34,11 @@ function App() {
                <Route exact path="/login" component={Login} />
                <Route exact path="/logout" component={Logout} />
                <Route exact path="/messages" component={Messages} />
-               <Footer />
             </div>
          </BrowserRouter>
+         <Footer/>
       </StoreProvider>
+      
    )
 }
 

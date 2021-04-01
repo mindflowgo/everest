@@ -57,7 +57,7 @@ function NavBar() {
    return (
    <>
       { localStorage.session && 
-         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+         <nav class="navbar navbar-expand-lg navbar-success bg-success">
             <NavLink to="/" className="navbar-brand">
                <img src='https://upload.wikimedia.org/wikipedia/commons/7/79/Mountain_icon_%28Noun_Project%29.svg' alt="mountain icon" width="64" height="64" />
             </NavLink>

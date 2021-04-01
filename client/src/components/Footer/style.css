@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;700&display=swap');
+
+footer {
+  text-align: center;
+  background-color: 39ac73;
+  min-height: 50px;
+  height: 50px;
+  color: white;
+  position: fixed;
+  bottom: 0;
+  width: 100%
+}
+.footerParagraph {
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  font-family: 'Raleway';
+}
