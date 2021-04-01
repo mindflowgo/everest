@@ -113,6 +113,18 @@ async function createBuyer(id, buyerInfo) {
       }
    }
 }
+async function createSeller(id, sellerInfo) {
+   
+   const userData = await db.sellers.create({ ...sellerInfo, user: mongoose.Types.ObjectId(`${id}`) })
+   const updateUser = await db.users.updateOne({"_id": ObjectId(id)}, {$set: {seller: ObjectId(userData._id)}})
+   return {
+      status: true,
+      message: `inserting in ${userData.insertedId}...`,
+      userData: {
+         id: userData._id,
+      }
+   }
+}
 async function userSession(userId) {
    const userData = await db.users.findOne({ _id: userId })
    if (!userData || !userData._id) {
@@ -188,5 +200,6 @@ module.exports = {
    productList,
    productSaveAndList,
    seedDatabase,
-   createBuyer
+   createBuyer,
+   createSeller
 }

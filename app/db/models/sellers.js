@@ -3,9 +3,6 @@ const Schema = mongoose.Schema
 
 const seller = new Schema(
    {
-      user: {
-         type: Schema.Types.ObjectId,  
-     },
       dogName: {
          type: String,
          trim: true,
@@ -42,7 +39,10 @@ const seller = new Schema(
       description: {
          type: String,
          required: "Please provide information about the dog"
-      }
+      },
+      user: {
+         type: Schema.Types.ObjectId,  
+     }
    }
 );
 
