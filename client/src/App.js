@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { BrowserRouter, Route } from 'react-router-dom'
 import { StoreProvider } from './utils/GlobalStore'
 
@@ -14,6 +14,7 @@ import Login from './pages/Login/Login'
 import Logout from './pages/Logout'
 import Cart from './pages/Cart'
 import Settings from './pages/Settings'
+import Messages from './pages/Messages'
 
 function App() {
    return (
@@ -22,7 +23,7 @@ function App() {
             <div className="container">
                <AlertBar />
                <NavBar />
-               <Route exact path={['/','/products']} component={Products} />
+               <Route exact path={['/', '/products']} component={Products} />
                <Route exact path="/products/add" component={ProductsAdd} />
                <Route exact path="/products/info/:id" component={ProductsInfo} />
                <Route exact path="/cart" component={Cart} />
@@ -30,6 +31,7 @@ function App() {
                <Route exact path="/register" component={Register} />
                <Route exact path="/login" component={Login} />
                <Route exact path="/logout" component={Logout} />
+               <Route exact path="/messages" component={Messages} />
             </div>
          </BrowserRouter>
          <Footer/>
