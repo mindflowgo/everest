@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8080/",
   "dependencies": {
+    "@material-ui/core": "^4.11.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
@@ -11,7 +12,7 @@
     "socket.io-client": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --host 0.0.0.0",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
