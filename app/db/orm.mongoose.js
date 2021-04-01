@@ -1,21 +1,22 @@
-const mongoose = require( 'mongoose' )
-const bcrypt = require( 'bcrypt' )
+const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+const ObjectId = require('mongodb').ObjectId
 
 mongoose.connect(process.env.MONGODB_URI,
-   {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
+   { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
 
 // include mongoose models (it will include each file in the models directory)
-const db = require( './models' )
+const db = require('./models')
 
-async function userRegister( userData ){
-   if( !userData.name || !userData.email || !userData.password ){
-      console.log( '[registerUser] invalid userData! ', userData )
+async function userRegister(userData) {
+   if (!userData.name || !userData.email || !userData.password) {
+      console.log('[registerUser] invalid userData! ', userData)
       return { status: false, message: 'Invalid user data' }
    }
 
    // refuse duplicate user emails
    let duplicateUser = await db.users.findOne({ email: userData.email })
-   if( duplicateUser && duplicateUser._id ){
+   if (duplicateUser && duplicateUser._id) {
       return { status: false, message: 'Duplicate email, try another or login' }
    }
 
@@ -28,8 +29,8 @@ async function userRegister( userData ){
       thumbnail: userData.thumbnail || '',
       password: passwordHash
    }
-   const saveUser = await db.users.create( saveData )
-   if( !saveUser._id ){
+   const saveUser = await db.users.create(saveData)
+   if (!saveUser._id) {
       return { status: false, message: `Sorry failed creating entry for ${saveUser.name}: ` }
    }
 
@@ -40,24 +41,23 @@ async function userRegister( userData ){
          id: saveUser._id,
          name: saveUser.name,
          email: saveUser.email,
-         thumbnail: saveUser.thumbnail
       }
    }
 }
 
-async function userOAuthRegister({ type, authId, name, thumbnail } ){
-   if( !authId ){
-      console.log( '[registerUser] invalid OAuth data! ', authId )
+async function userOAuthRegister({ type, authId, name, thumbnail }) {
+   if (!authId) {
+      console.log('[registerUser] invalid OAuth data! ', authId)
       return { status: false, message: 'Invalid user data' }
    }
 
    let oAuthUser = await db.users.findOne({ type, authId })
-   console.log( `.. looking in userlist for type(${type}) and authId(${authId})` )
-   if( !oAuthUser || !oAuthUser._id ){
+   console.log(`.. looking in userlist for type(${type}) and authId(${authId})`)
+   if (!oAuthUser || !oAuthUser._id) {
       // new user so create!
-      console.log( '... SAVING oAuth user to database ')
+      console.log('... SAVING oAuth user to database ')
       oAuthUser = await db.users.create({ type, authId, name, thumbnail })
-      if( !oAuthUser._id ){
+      if (!oAuthUser._id) {
          return { status: false, message: `Sorry failed creating entry for ${name}: ` }
       }
    }
@@ -76,16 +76,16 @@ async function userOAuthRegister({ type, authId, name, thumbnail } ){
    }
 }
 
-async function userLogin( email, password ) {
+async function userLogin(email, password) {
    const userData = await db.users.findOne({ email: email }, '-createdAt -updatedAt')
-   if( !userData || !userData._id ) {
+   if (!userData || !userData._id) {
       return { status: false, message: 'Invalid login' }
    }
 
    // compare the passwords to see if valid login
-   const isValidPassword = await bcrypt.compare( password, userData.password )
+   const isValidPassword = await bcrypt.compare(password, userData.password)
    // console.log( ` [loginUser] checking password (password: ${password} ) hash(${userData.password})`, isValidPassword )
-   if( !isValidPassword ) {
+   if (!isValidPassword) {
       return { status: false, message: 'Invalid password' }
    }
 
@@ -101,10 +101,33 @@ async function userLogin( email, password ) {
       }
    }
 }
-
-async function userSession( userId ){
+async function createBuyer(id, buyerInfo) {
+   
+   const userData = await db.buyers.create({ ...buyerInfo, user: mongoose.Types.ObjectId(`${id}`) })
+   const updateUser = await db.users.updateOne({"_id": ObjectId(id)}, {$set: {buyer: ObjectId(userData._id)}})
+   return {
+      status: true,
+      message: `inserting in ${userData.insertedId}...`,
+      userData: {
+         id: userData._id,
+      }
+   }
+}
+async function createSeller(id, sellerInfo) {
+   
+   const userData = await db.sellers.create({ ...sellerInfo, user: mongoose.Types.ObjectId(`${id}`) })
+   const updateUser = await db.users.updateOne({"_id": ObjectId(id)}, {$set: {seller: ObjectId(userData._id)}})
+   return {
+      status: true,
+      message: `inserting in ${userData.insertedId}...`,
+      userData: {
+         id: userData._id,
+      }
+   }
+}
+async function userSession(userId) {
    const userData = await db.users.findOne({ _id: userId })
-   if( !userData || !userData._id ) {
+   if (!userData || !userData._id) {
       return { status: false, message: 'Invalid session' }
    }
    return {
@@ -119,17 +142,17 @@ async function userSession( userId ){
    }
 }
 
-async function productList( productId='', ownerId='', message='' ){
+async function productList(productId = '', ownerId = '', message = '') {
    const findSet = {}
-   if( productId && productId.length>10 ) {
+   if (productId && productId.length > 10) {
       findSet._id = productId
    }
-   if( ownerId ) {
+   if (ownerId) {
       findSet.ownerId = ownerId
    }
    let products = await db.products.find(findSet, '-__v')
    // map a 'id' field to be consistent with mysql
-   console.log( `[orm:productList] products(${products.length}) findSet:`, findSet )
+   console.log(`[orm:productList] products(${products.length}) findSet:`, findSet)
    return {
       status: true,
       message,
@@ -137,34 +160,34 @@ async function productList( productId='', ownerId='', message='' ){
    }
 }
 
-async function productSaveAndList( newProduct, ownerId ){
+async function productSaveAndList(newProduct, ownerId) {
    // refuse duplicate user emails
    const result = await db.products.create({ ...newProduct, ownerId })
-   if( !result._id ){
+   if (!result._id) {
       return {
          status: false,
          message: 'Sorry could not save task!'
       }
    }
 
-   return productList( '', ownerId, 'Product saved' )
+   return productList('', ownerId, 'Product saved')
 }
 
-async function seedDatabase(){
+async function seedDatabase() {
    const productsExist = await db.products.findOne({})
-   if( productsExist && productsExist._id ){
-      console.log( ' .. not seeding, found a product already.' )
+   if (productsExist && productsExist._id) {
+      console.log(' .. not seeding, found a product already.')
       return
    }
 
    const fs = require('fs')
-   const products = JSON.parse( fs.readFileSync( './app/db/seed.json' ) )
-   products.forEach( async productData=>{
-      const result = await db.products.create( productData )
-      if( !result._id ){
-         console.log( ' .. problems seeding entry: ', productData )
+   const products = JSON.parse(fs.readFileSync('./app/db/seed.json'))
+   products.forEach(async productData => {
+      const result = await db.products.create(productData)
+      if (!result._id) {
+         console.log(' .. problems seeding entry: ', productData)
       } else {
-         console.log( `.. seeded: ${productData.heading}` )
+         console.log(`.. seeded: ${productData.heading}`)
       }
    })
 }
@@ -176,5 +199,7 @@ module.exports = {
    userSession,
    productList,
    productSaveAndList,
-   seedDatabase
+   seedDatabase,
+   createBuyer,
+   createSeller
 }
